@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+$:.unshift File.expand_path('../..', __FILE__)
+
+require 'ploy/command'
+
+Ploy::Command.run(ARGV)
