@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -e
+
+RELEASE_ID=todo
+
+fail() {
+  echo $@ >&2
+  exit 1
+}
+
+echo "Preparing to build release '$RELEASE_ID'"
+
+if ! /vagrant/script/slugify /vagrant/.cache /vagrant/.release/$RELEASE_ID ; then
+  fail "Build failure (see logs)"
+fi
+
+cd /vagrant/.release
+if [ ! -x $RELEASE_ID/script/install ] ; then
+  fail "We're missing a script/install script in the release"
+fi
+
+if ! tar czf $RELEASE_ID.tar.gz $RELEASE_ID ; then
+  fail "Archive creating issue ??"
+fi
+
+echo "Build of release '$RELEASE_ID' successful"

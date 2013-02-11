@@ -2,6 +2,8 @@ source :rubygems
 
 gemspec
 
+gem 'rest-client'
+
 gem 'thor', '~> 0.17.0'
 gem 'fog', '~> 1.9.0'
 gem 'vagrant', '~> 1.0.0'

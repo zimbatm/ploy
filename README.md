@@ -1,17 +1,31 @@
 Ploy: faster than deploy
 ========================
 
-We don't want to loose the power of developer-initiated deploys (eg:
-Capistrano).
+As a PaaS provider we don't have the issues that Chef server deals with:
+we don't need to handle heterogenous environments. We can take shortcuts
+and adapt our application code to adjust to a single and opinionated
+environment.
 
-We don't want to depent (whenever possible) on external sources during
+We want simple deploys, as simple as Heroku. But we don't want to loose
+the power of developer-initiated command tools like Capistrano.
+
+We don't want to depend (whenever possible) on external sources during
 deploy. Things are all bundled in a single package before deploy.
 
 We want to separate platform concerns from the application concerns.
 
-Deploying an application should be as simple as Heroku.
+We want to avoid remote ruby dependencies.
 
-We standardise on a single target OS.
+We run ruby 1.9.3+ locally.
+
+Platform specifics
+------------------
+
+Application code is deployed in /mnt/app
+
+We standardise on a single target OS: Ubuntu Precise 64 at the moment.
+
+All hosts have a statsd daemon available.
 
 Interfaces
 ----------
