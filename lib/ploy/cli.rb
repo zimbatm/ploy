@@ -1,9 +1,13 @@
+require 'ploy'
+require 'scrolls'
 require 'thor'
 
 module Ploy
   # http://whatisthor.com/
   class CLI < Thor
-    desc "build", "Create a build of your code using Vagrant"
+    class ConfigurationError < Ploy::Errors::Error; end
+
+    desc "build", "WIP: Create a build of your code using Vagrant"
     def build
       require 'vagrant'
       require 'vagrant/cli'
@@ -25,9 +29,39 @@ module Ploy
       exit 999 
     end
 
+    desc "connect", "Connects to a remote url and configures your repo"
+    def connect
+
+    end
+
+    desc "init", "Adds default slugify and install scripts in your project"
+    def init
+      require 'ploy/app'
+      require 'ploy-scripts'
+
+      app = App.find(Dir.pwd)
+      raise PloyError, "Project not found" unless app
+
+      system("cp -rv #{PloyScripts.bootstrap_dir}/* #{app.root}")
+    end
+
     desc "account", "Gets account informations"
     def account
-      raise ConfigurationError unless Ploy.config.host
+      require 'ploy/client'
+      host = Ploy.config.host
+      token = Ploy.config.token
+      raise ConfigurationError, "Unknown host" unless host
+      raise ConfigurationError, "Unknown token" unless token
+
+      client = Client.new(host: host, auth: ":#{token}")
+      Scrolls.log client.get_account
     end
+
+    desc "version", "Prints the version of ploy"
+    def version
+      require 'ploy/version'
+      puts "Ploy v#{Ploy::VERSION}"
+    end
+
   end
 end

@@ -7,18 +7,16 @@ module Ploy
         raise ConfigurationError, "git or repo not found"
       end
 
-      host = %x[git config ploy.host]
-      user = %x[git config ploy.user]
-      token = %x[git config ploy.token]
+      host = %x[git config ploy.host].strip
+      token = %x[git config ploy.token].strip
 
-      new(host: host, user: user, token: token)
+      new(host: (host unless host.empty?), token: (token unless token.empty?))
     end
 
-    attr_accessor :host, :user, :token
+    attr_accessor :host, :token
 
     def initialize(config)
       @host = config[:host]
-      @user = config[:user]
       @token = config[:token]
     end
   end

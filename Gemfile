@@ -14,6 +14,8 @@ gem 'net-scp', '1.0.4'
 gem 'ffi', '~> 1.0.9'
 gem 'virtualbox', '~> 0.9.2'
 
+gem 'ploy-scripts', path: '../ploy-scripts'
+
 group :development do
   gem 'rspec'
 end
