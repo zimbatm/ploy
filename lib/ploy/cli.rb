@@ -1,5 +1,4 @@
 require 'ploy'
-require 'scrolls'
 require 'thor'
 
 module Ploy
@@ -54,7 +53,7 @@ module Ploy
       raise ConfigurationError, "Unknown token" unless token
 
       client = Client.new(host: host, auth: ":#{token}")
-      Scrolls.log client.get_account
+      p client.get_account
     end
 
     desc "version", "Prints the version of ploy"

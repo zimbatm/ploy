@@ -13,7 +13,8 @@ Gem::Specification.new do |s|
   s.executable = 'ploy'
 
   s.add_dependency 'ploy-scripts', '0.1.0'
-  s.add_dependency 'excon', '~> 0.16.0'
-  s.add_dependency 'multi_json', '~> 1.6.0'
-  s.add_dependency 'scrolls', '~> 0.2.0'
+
+  s.add_dependency 'excon'
+  s.add_dependency 'multi_json'
+  s.add_dependency 'thor'
 end
