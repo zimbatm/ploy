@@ -1,5 +1,6 @@
 require 'ploy'
 require 'thor'
+require 'pp'
 
 module Ploy
   # http://whatisthor.com/
@@ -19,20 +20,30 @@ module Ploy
 
     desc "account", "Gets account informations"
     def account
-      require 'ploy/client'
-      host = Ploy.config.host
-      token = Ploy.config.token
-      raise ConfigurationError, "Unknown host" unless host
-      raise ConfigurationError, "Unknown token" unless token
+      pp client.get_account
+    end
 
-      client = Client.new(host: host, auth: ":#{token}")
-      p client.get_account
+    desc "providers", "Gets account-linked providers"
+    def providers
+      pp client.get_providers
     end
 
     desc "version", "Prints the version of ploy"
     def version
       require 'ploy/version'
       puts "Ploy v#{Ploy::VERSION}"
+    end
+
+    protected
+
+    def client
+      return @client if @client
+      require 'ploy/client'
+      host = Ploy.config.host
+      token = Ploy.config.token
+      raise ConfigurationError, "Unknown host" unless host
+      raise ConfigurationError, "Unknown token" unless token
+      @client = Client.new(host: host, auth: ":#{token}")
     end
 
   end

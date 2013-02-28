@@ -3,6 +3,9 @@ require 'excon'
 require 'multi_json'
 
 require 'ploy/api/account'
+require 'ploy/api/apps'
+require 'ploy/api/providers'
+
 require 'ploy/errors'
 require 'ploy/version'
 

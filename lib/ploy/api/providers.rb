@@ -1,11 +1,11 @@
 module Ploy
   module API
-    # GET /services
-    def get_services
+    # GET /providers
+    def get_providers
       request(
         expects: 200,
         method: :get,
-        path: "/services",
+        path: "/providers",
       ).body
     end
   end
