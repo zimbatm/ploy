@@ -15,7 +15,7 @@ module Ploy
       end
 
       def load
-        unless system("git status >/dev/null")
+        unless system("git status >/dev/null 2>&1")
           raise ConfigurationError, "git or repo not found"
         end
 
