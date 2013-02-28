@@ -50,7 +50,7 @@ module Ploy
       @auth = options.delete(:auth) || ENV['PLOY_AUTH']
 
       options[:headers] = HEADERS.merge({
-        'Authorization' => "Basic #{Base64.encode64(@auth).gsub("\n", '')}",
+        'Authorization' => "Basic #{Base64.encode64(@auth).rstrip}",
       }).merge(options[:headers])
 
       @connection = Excon.new("#{@scheme}://#{@host}", options)
