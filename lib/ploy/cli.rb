@@ -18,6 +18,11 @@ module Ploy
       system("cp -rv #{PloyScripts.bootstrap_dir}/* #{app.root}")
     end
 
+    desc "ploy_config", "Infos"
+    def ploy_config
+      pp Ploy.config
+    end
+
     desc "account", "Gets account informations"
     def account
       pp client.get_account
