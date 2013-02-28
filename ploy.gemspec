@@ -1,6 +1,8 @@
+require File.expand_path('../lib/ploy/version', __FILE__)
+
 Gem::Specification.new do |s|
   s.name = 'ploy'
-  s.version = '1.0'
+  s.version = Ploy::VERSION
   s.summary = 'Faster than deploy'
   s.description = 'An opinionated tool to deploy to the cloud'
 
