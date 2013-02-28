@@ -20,11 +20,10 @@ module Ploy
     module EmbedResponse
       attr_reader :response
 
-      def self.wrap(response)
-        body = response.body
-        body.extend EmbedResponse
-        body.instance_variable_set('@response', response)
-        body
+      def self.wrap(object, response)
+        object.extend EmbedResponse
+        object.instance_variable_set('@response', response)
+        object
       end
     end
 
@@ -60,7 +59,7 @@ module Ploy
       begin
         response = @connection.request(params, &block)
       rescue Excon::Errors::HTTPStatusError => error
-        klass = case error.response.status
+        klass = case error.response[:status]
           when 401 then Ploy::Errors::Unauthorized
           when 402 then Ploy::Errors::VerificationRequired
           when 403 then Ploy::Errors::Forbidden
@@ -85,7 +84,7 @@ module Ploy
         if response.headers['Content-Encoding'] == 'gzip'
           response.body = Zlib::GzipReader.new(StringIO.new(response.body)).read
         end
-        
+
         if response.headers['Content-Type'].to_s =~ /json/
           response.body = MultiJson.decode(response.body)
         end
@@ -94,7 +93,7 @@ module Ploy
       # reset (non-persistent) connection
       @connection.reset
 
-      EmbedResponse.wrap(response)
+      EmbedResponse.wrap(response.body, response)
     end
   end
 end
