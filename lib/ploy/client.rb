@@ -55,6 +55,28 @@ module Ploy
       @connection = Excon.new("#{@scheme}://#{@host}", options)
     end
 
+    def get(path, query={})
+      simple_request(:get, path, query)
+    end
+
+    def post(path, query={})
+      simple_request(:get, path, query)
+    end
+
+    def put(path, query={})
+      simple_request(:get, path, query)
+    end
+
+    def delete(path, query={})
+      simple_request(:get, path, query)
+    end
+
+    def simple_request(method, path, query={})
+      params = {method: method, path: path}
+      params[:query] = query if query && query.size > 0
+      request(params)
+    end
+
     def request(params, &block)
       begin
         response = @connection.request(params, &block)
