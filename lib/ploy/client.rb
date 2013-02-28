@@ -46,10 +46,10 @@ module Ploy
 
       @scheme = options.delete(:scheme)
       @host = options.delete(:host) || ENV['PLOY_HOST']
-      @auth = options.delete(:auth) || ENV['PLOY_AUTH']
+      @token = options.delete(:token) || ENV['PLOY_TOKEN']
 
       options[:headers] = HEADERS.merge({
-        'Authorization' => "Basic #{Base64.encode64(@auth).rstrip}",
+        'Authorization' => "Basic #{Base64.encode64(@token + ':').rstrip}",
       }).merge(options[:headers])
 
       @connection = Excon.new("#{@scheme}://#{@host}", options)

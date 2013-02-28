@@ -46,7 +46,7 @@ module Ploy
       token = Ploy.config.token
       raise ConfigurationError, "Unknown host" unless host
       raise ConfigurationError, "Unknown token" unless token
-      @client = Client.new(host: host, auth: ":#{token}")
+      @client = Client.new(host: host, token: token)
     end
 
   end
