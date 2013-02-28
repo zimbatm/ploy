@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-$:.unshift File.expand_path('../..', __FILE__)
-
+require 'bundler/setup'
 require 'ploy/cli'
 
 Ploy::CLI.start(ARGV)

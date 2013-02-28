@@ -11,7 +11,7 @@ gemspec
 #gem 'ffi', '~> 1.0.9'
 #gem 'virtualbox', '~> 0.9.2'
 
-gem 'ploy-scripts', path: '../ploy-scripts'
+gem 'ploy-scripts', github: 'pandastream/ploy-scripts'
 
 group :development do
   gem 'rspec'

@@ -9,13 +9,11 @@ module Ploy
 
     desc "init", "Adds default slugify and install scripts in your project"
     def init
-      require 'ploy/app'
       require 'ploy-scripts'
 
-      app = App.find(Dir.pwd)
-      raise PloyError, "Project not found" unless app
+      raise PloyError, "Project not found" unless Ploy.config.app_root
 
-      system("cp -rv #{PloyScripts.bootstrap_dir}/* #{app.root}")
+      system("cp -rv #{PloyScripts.bootstrap_dir}/* #{Ploy.config.app_root}")
     end
 
     desc "ploy_config", "Infos"
