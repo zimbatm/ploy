@@ -15,4 +15,5 @@ gem 'ploy-scripts', path: '../ploy-scripts'
 
 group :development do
   gem 'rspec'
+  gem 'fuubar'
 end
