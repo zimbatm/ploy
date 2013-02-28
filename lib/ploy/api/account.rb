@@ -6,7 +6,7 @@ module Ploy
         expects: 200,
         method: :get,
         path: "/account",
-      ).body
+      )
     end
 
     # GET /tokens
@@ -15,7 +15,7 @@ module Ploy
         expects: 200,
         method: :get,
         path: "/tokens",
-      ).body
+      )
     end
   end
 end

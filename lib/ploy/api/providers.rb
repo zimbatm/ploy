@@ -6,7 +6,7 @@ module Ploy
         expects: 200,
         method: :get,
         path: "/providers",
-      ).body
+      )
     end
   end
 end

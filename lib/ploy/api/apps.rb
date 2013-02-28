@@ -5,7 +5,7 @@ module Ploy
         expects: 200,
         method: :get,
         path: "/apps",
-      ).body
+      )
     end
   end
 end

@@ -14,6 +14,20 @@ module Ploy
   class Client
     include API
 
+    # Turns the response around so that response.body is the object
+    # but you can still get access to the original response by calling +#response+
+    # on the object.
+    module EmbedResponse
+      attr_reader :response
+
+      def self.wrap(response)
+        body = response.body
+        body.extend EmbedResponse
+        body.instance_variable_set('@response', response)
+        body
+      end
+    end
+
     HEADERS = {
       'Accept'                => 'application/json',
       'User-Agent'            => "ploy/#{Ploy::VERSION}",
@@ -80,7 +94,7 @@ module Ploy
       # reset (non-persistent) connection
       @connection.reset
 
-      response
+      EmbedResponse.wrap(response)
     end
   end
 end
