@@ -3,6 +3,7 @@ require 'excon'
 require 'multi_json'
 
 require 'ploy/api/account'
+require 'ploy/api/app'
 require 'ploy/api/apps'
 require 'ploy/api/providers'
 
@@ -35,10 +36,10 @@ module Ploy
     }
 
     OPTIONS = {
-      :headers  => {},
-      :host     => 'localhost',
-      :nonblock => false,
-      :scheme   => 'http'
+      headers:  {},
+      host:     'localhost',
+      nonblock: false,
+      scheme:   'http',
     }
 
     def initialize(options={})

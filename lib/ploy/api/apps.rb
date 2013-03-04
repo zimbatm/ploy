@@ -7,5 +7,14 @@ module Ploy
         path: "/apps",
       )
     end
+
+    def post_apps(app_name)
+      request(
+        expects: 201,
+        method: :post,
+        path: "/apps",
+        query: { name: app_name },
+      )
+    end
   end
 end

@@ -23,7 +23,7 @@ Platform specifics
 
 Application code is deployed in /mnt/app
 
-We standardise on a single target OS: Ubuntu Precise 64 at the moment.
+We standardise on a single target OS: Ubuntu Precise 64
 
 All hosts have a statsd daemon available.
 
@@ -33,7 +33,7 @@ Interfaces
 `script/slugify CACHE_DIR TARGET_DIR`: A project needs to have this script
 to produce a slug.
 
-`script/install SLUG_URL CONFIG_URL`: A slug needs to contain this
+`script/install CONFIG_PATH`: A slug needs to contain this
 executable after unpacking to prepare the system.
 
 `script/post-install`: A slug MAY have this script to run after a deploy
@@ -45,8 +45,6 @@ Commands
 `ploy init`: Setups your project for ploy
 
 `ploy setup`: Initializes a target
-
-`ploy build`: Creates a slug from your project
 
 `ploy deploy [target]`: ???
 

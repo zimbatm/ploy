@@ -47,8 +47,11 @@ module Ploy
 
       # Funky heuristic
       def find_app_name
+        app_name = %w[git config ploy.app_name].strip
+        return app_name unless app_name.empty?
+
+        # Infer from origin repo
         app_repo = %x[git remote -v | grep origin].match(/origin\s*([^\s]+)/)[1]
-          
         if app_repo.include?('github.com')
           app_repo.match(%r[(?:git@|.*://)[^/:]+[:/](.*).git])[1]
         end
