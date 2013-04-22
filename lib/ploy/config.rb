@@ -47,7 +47,7 @@ module Ploy
 
       # Funky heuristic
       def find_app_name
-        app_name = %w[git config ploy.app_name].strip
+        app_name = %x[git config ploy.app_name 2>/dev/null].strip
         return app_name unless app_name.empty?
 
         # Infer from origin repo

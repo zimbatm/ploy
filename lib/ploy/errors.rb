@@ -1,8 +1,9 @@
 module Ploy
   module Errors
-    class Error < StandardError; end
+    module Error; end
 
-    class ErrorWithResponse < Error
+    class ErrorWithResponse < StandardError
+      include Error
       attr_reader :response
 
       def initialize(message, response)
@@ -19,7 +20,10 @@ module Ploy
     class Locked < ErrorWithResponse; end
     class RequestFailed < ErrorWithResponse; end
     
-    class ServiceNotAvailable < Error; end
+    class ServiceNotAvailable < StandardError; include Error; end
+
+
+    class ConfigurationError < StandardError; include Error; end
   end
   include Errors
 end

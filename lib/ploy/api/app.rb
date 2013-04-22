@@ -1,14 +1,31 @@
 module Ploy
   module API
+    def get_apps
+      request(
+        expects: 200,
+        method: :get,
+        path: "/apps",
+      )
+    end
+
+    def post_apps(app_name)
+      request(
+        expects: 201,
+        method: :post,
+        path: "/apps",
+        query: { name: app_name },
+      )
+    end
+    
     def get_app(app_name)
       request(
         expects: 200,
         method: :get,
-        path: "/app/#{app_name}",
+        path: "/apps/#{app_name}",
       )
     end
 
-    def get_slugs(app_name)
+    def get_app_slugs(app_name)
       request(
         expects: 200,
         method: :get,
@@ -16,12 +33,15 @@ module Ploy
       )
     end
 
-    def get_targets(app_name)
+    def get_app_targets(app_name)
       request(
         expects: 200,
         method: :get,
         path: "/apps/#{app_name}/targets",
       )
+    end
+
+    def post_app_deploy(app_name, commit_id, target_filter)
     end
   end
 end

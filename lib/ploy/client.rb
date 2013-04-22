@@ -4,8 +4,8 @@ require 'multi_json'
 
 require 'ploy/api/account'
 require 'ploy/api/app'
-require 'ploy/api/apps'
-require 'ploy/api/providers'
+require 'ploy/api/provider'
+require 'ploy/api/target'
 
 require 'ploy/errors'
 require 'ploy/version'

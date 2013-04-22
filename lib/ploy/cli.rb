@@ -1,15 +1,15 @@
 require 'ploy'
+require 'ploy/errors'
 require 'thor'
 require 'pp'
 
 module Ploy
   # http://whatisthor.com/
   class CLI < Thor
+    #### Extensions ####
+
     module ClientHelper
-      class ConfigurationError < Ploy::Errors::Error; end
-
       protected
-
       def client
         return @client if @client
         require 'ploy/client'
@@ -21,6 +21,20 @@ module Ploy
       end
     end
     include ClientHelper
+    module HandleErrors
+      protected
+
+      def dispatch(meth, given_args, given_opts, config)
+        super
+      rescue error_handled? => ex
+        p ex
+      end
+
+      def error_handled?
+        $!.kind_of?(Ploy::Errors::Error) && $!
+      end
+    end
+    extend HandleErrors
 
     desc "init", "Adds default slugify and install scripts in your project"
     def init
@@ -66,12 +80,12 @@ module Ploy
 
       desc "slugs", "Slugs of an app"
       def slugs
-        pp client.get_slugs(options[:app])
+        pp client.get_app_slugs(options[:app])
       end
 
       desc "targets", "Targets of an app"
       def targets
-        pp client.get_targets(options[:app])
+        pp client.get_app_targets(options[:app])
       end
     end
 
