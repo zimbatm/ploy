@@ -92,6 +92,16 @@ module Ploy
     desc "app SUBCOMMAND ...ARGS", "manage the app"
     subcommand "app", App
 
+    desc "build", "Runs a local vagrant box to build the project. Only one build at a time"
+    def build
+      require 'ploy-scripts'
+      vagrant_dir = File.join(Ploy.data_dir, 'vagrant')
+      ENV['PLOY_BUILD_SCRIPT'] = PloyScripts.build_script
+      ENV['PLOY_APP_ROOT'] = Ploy.config.app_root
+      Dir.chdir(vagrant_dir)
+      exec("vagrant up")
+    end
+
     desc "version", "Prints the version of ploy"
     def version
       require 'ploy/version'
