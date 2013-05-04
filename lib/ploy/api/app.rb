@@ -41,7 +41,13 @@ module Ploy
       )
     end
 
-    def post_app_deploy(app_name, commit_id, target_filter)
+    def post_app_deploy(app_name, commit_id, env)
+      request(
+        expects: 200,
+        method: :post,
+        path: "/apps/#{app_name}/deploy",
+        query: {commit_id: commit_id, env: env}
+      )
     end
   end
 end

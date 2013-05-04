@@ -87,6 +87,11 @@ module Ploy
       def targets
         pp client.get_app_targets(options[:app])
       end
+
+      desc "deploy", "Deploys"
+      def deploy(env='staging')
+        pp client.post_app_deploy(options[:app], Ploy.config.commit_id, env)
+      end
     end
 
     desc "app SUBCOMMAND ...ARGS", "manage the app"
