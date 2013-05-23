@@ -87,10 +87,8 @@ module Ploy
     end
   end
 
-  @config = Config.load
   class << self
     attr_reader :config
-
-    def data_dir; File.expand_path('../../../data/ploy', __FILE__); end
   end
+  @config = Config.load
 end
