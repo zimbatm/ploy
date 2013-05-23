@@ -38,11 +38,9 @@ module Ploy
 
     desc "init", "Adds default slugify and install scripts in your project"
     def init
-      require 'ploy-scripts'
-
       raise PloyError, "Project not found" unless Ploy.config.app_root
 
-      system("cp -rv #{PloyScripts.bootstrap_dir}/* #{Ploy.config.app_root}")
+      system("cp -rv #{Ploy.bootstrap_dir}/* #{Ploy.config.app_root}")
     end
 
     desc "config", "Ploy configuration"
@@ -99,7 +97,6 @@ module Ploy
 
     desc "build", "Runs a local vagrant box to build the project. Only one build at a time"
     def build
-      require 'ploy-scripts'
       vagrant_dir = File.join(Ploy.data_dir, 'vagrant')
       ENV['PLOY_BUILD_SCRIPT'] = PloyScripts.build_script
       ENV['PLOY_APP_ROOT'] = Ploy.config.app_root

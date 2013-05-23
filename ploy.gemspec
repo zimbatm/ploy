@@ -11,10 +11,8 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/mediacore/ploy'
   s.license = 'MIT'
 
-  s.files = %w[README.md bin/ploy] + Dir['data/**/*'] + Dir['lib/**/*.rb']
+  s.files = %w[README.md bin/ploy] + Dir['data/**/*'] + Dir['lib/ploy/**/*.rb']
   s.executable = 'ploy'
-
-  s.add_dependency 'ploy-scripts', '0.1.0'
 
   s.add_dependency 'excon'
   s.add_dependency 'multi_json'
