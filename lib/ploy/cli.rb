@@ -1,4 +1,5 @@
 require 'ploy'
+require 'ploy/config'
 require 'ploy/errors'
 require 'thor'
 require 'pp'
