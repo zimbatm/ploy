@@ -1,5 +1,6 @@
 curl              apt build runtime
-ruby1.9.3         apt build runtime
+ruby1.9.1         apt build runtime
+ruby1.9.1-dev     apt build
 build-essential   apt build
 libxml2-dev       apt build
 libxml2           apt runtime
