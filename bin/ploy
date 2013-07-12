@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'bundler/setup'
+libdir = File.expand_path('../../lib', __FILE__)
+$:.unshift(libdir) unless $:.include?(libdir)
+
 require 'ploy/cli'
 
 Ploy::CLI.start(ARGV)
