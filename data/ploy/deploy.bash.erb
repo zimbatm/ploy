@@ -64,7 +64,7 @@ echo "$CONFIG" > $CONFIG_FILE
 
 log Fetching slug "$SLUG_URL"
 curl -L -o "$SLUG_FILE" "$SLUG_URL"
-tar --no-same-owner -xavf "$SLUG_FILE"
+tar --no-same-owner -xaf "$SLUG_FILE"
 
 log Install starting
 ./script/install $CONFIG_FILE
