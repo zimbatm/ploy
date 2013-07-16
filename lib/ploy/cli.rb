@@ -99,7 +99,7 @@ module Ploy
     desc "build", "Runs a local vagrant box to build the project. Only one build at a time"
     def build
       vagrant_dir = File.join(Ploy.data_dir, 'vagrant')
-      ENV['PLOY_BUILD_SCRIPT'] = PloyScripts.build_script
+      ENV['PLOY_BUILD_SCRIPT'] = Ploy.build_script
       ENV['PLOY_APP_ROOT'] = Ploy.config.app_root
       Dir.chdir(vagrant_dir)
       exec("vagrant up")
