@@ -19,7 +19,7 @@ module Ploy
     class Timeout < ErrorWithResponse; end
     class Locked < ErrorWithResponse; end
     class RequestFailed < ErrorWithResponse; end
-    
+
     class ServiceNotAvailable < StandardError; include Error; end
 
 

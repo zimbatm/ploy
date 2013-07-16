@@ -27,12 +27,8 @@ module Ploy
 
       def dispatch(meth, given_args, given_opts, config)
         super
-      rescue error_handled? => ex
+      rescue Ploy::Error => ex
         p ex
-      end
-
-      def error_handled?
-        $!.kind_of?(Ploy::Errors::Error) && $!
       end
     end
     extend HandleErrors
