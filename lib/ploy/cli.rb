@@ -105,8 +105,8 @@ module Ploy
         Ploy.config.commit_id_short
       ].join('-')
       Dir.chdir(vagrant_dir) do
-        exec("vagrant up")
-        exec("vagrant destroy")
+        system("vagrant up")
+        system("vagrant destroy")
       end
     end
 
