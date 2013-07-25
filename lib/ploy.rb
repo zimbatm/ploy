@@ -21,9 +21,7 @@ module Ploy
   # This can then be uploaded and executed on a target server.
   def gen_deploy(deploy_id, slug_url, config)
     require 'erb'
-    require 'multi_json'
     require 'shellwords'
-    config = MultiJson.dump(config)
     template = ERB.new(File.read(File.join(data_dir, 'deploy.bash.erb')))
     template.result(binding)
   end
