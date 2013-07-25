@@ -27,6 +27,7 @@ module Ploy
 
         if config[:app_root]
           config[:commit_id] = %x[git log -n 1 | head -n 1 | cut -d ' ' -f 2].strip
+          config[:commit_count] = %x[git log --oneline | wc -l].strip.to_i
           config[:branch] = %x[git branch | grep -e '^* ' | cut -d ' ' -f 2].strip
           config[:app_name] = find_app_name
         end
@@ -66,6 +67,7 @@ module Ploy
       token
 
       commit_id
+      commit_count
       branch
 
       app_name
@@ -79,6 +81,10 @@ module Ploy
         value = config[key]
         instance_variable_set("@#{key}", value) unless value.to_s.empty?
       end
+    end
+
+    def commit_id_short
+      commit_id[0..6]
     end
 
     protected

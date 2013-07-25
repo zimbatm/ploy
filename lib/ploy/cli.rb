@@ -97,9 +97,17 @@ module Ploy
       vagrant_dir = File.join(Ploy.data_dir, 'vagrant')
       ENV['PLOY_BUILD_SCRIPT'] = Ploy.build_script
       ENV['PLOY_APP_ROOT'] = Ploy.config.app_root
-      Dir.chdir(vagrant_dir)
-      exec("vagrant up")
-      exec("vagrant destroy")
+      ENV['PLOY_RELEASE_ID'] = [
+        Ploy.config.app_name,
+        Time.now.to_i,
+        Ploy.config.branch,
+        Ploy.config.commit_count,
+        Ploy.config.commit_id_short
+      ].join('-')
+      Dir.chdir(vagrant_dir) do
+        exec("vagrant up")
+        exec("vagrant destroy")
+      end
     end
 
     desc "version", "Prints the version of ploy"
