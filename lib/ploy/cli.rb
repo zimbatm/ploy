@@ -99,6 +99,7 @@ module Ploy
       ENV['PLOY_APP_ROOT'] = Ploy.config.app_root
       Dir.chdir(vagrant_dir)
       exec("vagrant up")
+      exec("vagrant destroy")
     end
 
     desc "version", "Prints the version of ploy"
