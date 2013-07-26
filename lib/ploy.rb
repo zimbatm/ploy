@@ -26,5 +26,10 @@ module Ploy
     template.result(binding)
   end
 
+  def gen_deploy_local(slug_url, config)
+    deploy_id = [Time.now.to_i, File.basename(slug_url.sub(/\?.*/,''), '.tar.gz')].join('-')
+    gen_deploy(deploy_id, slug_url, config)
+  end
+
   extend self
 end
