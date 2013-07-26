@@ -85,7 +85,7 @@ module Ploy
 
       desc "deploy", "Deploys"
       def deploy(env='staging')
-        pp client.post_app_deploy(options[:app], Ploy.config.commit_id, env)
+        pp client.post_app_deploy(options[:app], Ploy.config.app_commit, env)
       end
     end
 

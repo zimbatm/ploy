@@ -2,16 +2,25 @@ require 'ploy/errors'
 
 module Ploy
   class Config
-    module GitLoader
-      def attrs(new_attributes = [])
-        @attrs ||= []
+    class << self
+      def attrs(*attrs)
+        @attrs ||= {}
 
-        new_attributes.each do |attr_|
-          @attrs << attr_.to_sym
-          attr_reader(attr_)
+        attrs.flatten.each do |attr_|
+          key_rb = attr_.gsub('.', '_')
+          @attrs[attr_] = key_rb
+          attr_reader(key_rb)
         end
 
         @attrs
+      end
+
+      def git_config
+        @git_config ||= %x[git config -l].strip.lines.inject({}) do |conf, line|
+          k,v = line.split('=', 2)
+          conf[k] = v
+          conf
+        end
       end
 
       def load
@@ -19,17 +28,16 @@ module Ploy
           raise ConfigurationError, "git or repo not found"
         end
 
-        config = {
-          host: %x[git config ploy.host].strip,
-          token: %x[git config ploy.token].strip,
-          app_root: find_up('.git', Dir.pwd),
-        }
+        config = git_config
 
-        if config[:app_root]
-          config[:commit_id] = %x[git log -n 1 | head -n 1 | cut -d ' ' -f 2].strip
-          config[:commit_count] = %x[git log --oneline | wc -l].strip.to_i
-          config[:branch] = %x[git branch | grep -e '^* ' | cut -d ' ' -f 2].strip
-          config[:app_name] = find_app_name
+        app_root = find_up('.git', Dir.pwd)
+        if app_root
+          config['app.root'] = app_root
+          config['app.name'] ||= find_app_name
+
+          config['app.commit'] = %x[git log -n 1 | head -n 1 | cut -d ' ' -f 2].strip
+          config['app.commit_count'] = %x[git log --oneline | wc -l].strip.to_i
+          config['app.branch'] = %x[git branch | grep -e '^* ' | cut -d ' ' -f 2].strip
         end
 
         new(config)
@@ -48,9 +56,6 @@ module Ploy
 
       # Funky heuristic
       def find_app_name
-        app_name = %x[git config ploy.app_name 2>/dev/null].strip
-        return app_name unless app_name.empty?
-
         # Infer from origin repo
         app_repo = %x[git remote -v | grep origin].match(/origin\s*([^\s]+)/)
         app_repo &&= app_repo[1]
@@ -60,31 +65,33 @@ module Ploy
       end
     end
 
-    extend GitLoader
-
     attrs %w[
-      host
-      token
+      ploy.host
+      ploy.token
 
-      commit_id
-      commit_count
-      branch
+      app.name
+      app.root
+      app.commit
+      app.commit_count
+      app.branch
 
-      app_name
-      app_root
+      aws.access_key
+      aws.secret_key
+      aws.bucket
+      aws.private_key_path
     ]
 
     def initialize(config)
-      keys = config.keys - self.class.attrs
-      raise "Unknown keys: #{keys.inspect}" unless keys.empty?
-      attrs.each do |key|
-        value = config[key]
-        instance_variable_set("@#{key}", value) unless value.to_s.empty?
+      @config = config
+      
+      self.class.attrs.each_pair do |key, key_rb|
+        value = config[key] || ENV[key_rb.upcase]
+        instance_variable_set("@#{key_rb}", value)
       end
     end
 
-    def commit_id_short
-      commit_id[0..6]
+    def app_short_commit
+      app_commit[0..6]
     end
 
     protected
