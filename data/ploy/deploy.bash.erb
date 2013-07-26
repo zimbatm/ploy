@@ -39,6 +39,10 @@ lock() {
   fi
 }
 
+is_on_ec2() {
+  arp | grep fe:ff:ff:ff:ff:ff >/dev/null && wget -nv -t 1 -T 2 --spider http://169.254.169.254/1.0/
+}
+
 if [ `id -u` != 0 ]; then
   fail "You need to be root to run this script"
 fi
@@ -47,7 +51,7 @@ fi
 lock /tmp/deploy.lock || fail "Another deploy is already running"
 
 # If we're on EC2
-if ! mount | grep bind &>/dev/null && mount | grep ' /mnt ' &>/dev/null ; then
+if is_on_ec2 && ! mount | grep bind | grep /mnt/$APP_ROOT &>/dev/null ; then
   mkdir -p $APP_ROOT
   mkdir -p /mnt/$APP_ROOT
   mount --bind /mnt/$APP_ROOT $APP_ROOT
