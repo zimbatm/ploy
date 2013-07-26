@@ -92,23 +92,125 @@ module Ploy
     desc "app SUBCOMMAND ...ARGS", "manage the app"
     subcommand "app", App
 
-    desc "build", "Runs a local vagrant box to build the project. Only one build at a time"
-    def build
-      vagrant_dir = File.join(Ploy.data_dir, 'vagrant')
-      ENV['PLOY_BUILD_SCRIPT'] = Ploy.build_script
-      ENV['PLOY_APP_ROOT'] = Ploy.config.app_root
-      ENV['PLOY_RELEASE_ID'] = [
-        Ploy.config.app_name,
-        Time.now.to_i,
-        Ploy.config.branch,
-        Ploy.config.commit_count,
-        Ploy.config.commit_id_short
-      ].join('-')
-      Dir.chdir(vagrant_dir) do
-        system("vagrant up")
-        system("vagrant destroy")
+    class Local < Thor
+      desc "build", "Runs a local vagrant box to build the project. Only one build at a time"
+      def build
+        vagrant_dir = File.join(Ploy.data_dir, 'vagrant')
+        ENV['PLOY_BUILD_SCRIPT'] = Ploy.build_script
+        ENV['PLOY_APP_ROOT'] = Ploy.config.app_root
+        ENV['PLOY_RELEASE_ID'] = [
+          Ploy.config.app_name,
+          Time.now.to_i,
+          Ploy.config.app_branch,
+          Ploy.config.app_commit_count,
+          Ploy.config.app_short_commit
+        ].join('-')
+        Dir.chdir(vagrant_dir) do
+          system("vagrant up")
+          system("vagrant destroy")
+        end
+      end
+
+      desc "push", "Pushes a slug to S3"
+      def push(path)
+        require_fog
+
+        s3 = Fog::Storage.new(
+          provider: 'AWS',
+          aws_access_key_id:      Ploy.config.aws_access_key,
+          aws_secret_access_key:  Ploy.config.aws_secret_key,
+        )
+
+        bucket = s3.directories.get(Ploy.config.aws_bucket)
+        p [:s3_bucket, bucket]
+
+        object_path = "slugs/#{Ploy.config.app_name}/#{File.basename(path)}"
+
+        p [:checking, object_path]
+        object = bucket.files.head(object_path)
+        if object
+          p [:already_uploaded, object]
+          return object
+        end
+
+        p [:uploading, object]
+        object = bucket.files.create(
+          key: object_path,
+          body: File.open(path)
+        )
+        p [:uploaded, object]
+        object
+      end
+
+      ONE_WEEK_INTERVAL = (60 * 60 * 24 * 7)
+
+      desc "deploy", "Deploys a slug on a machine"
+      def deploy(path, config_path, instance_id)
+        object = push(path)
+
+        require 'net/scp'
+        require 'net/ssh'
+
+        slug_url = object.url(Time.now + ONE_WEEK_INTERVAL)
+        p [:slug_url, slug_url]
+
+        deploy_script = Ploy.gen_deploy_local slug_url, File.read(config_path)
+
+        ssh_options = {
+          auth_methods: ["publickey"]
+        }
+
+        ec2 = Fog::Compute.new(
+          provider: 'AWS',
+          aws_access_key_id:      Ploy.config.aws_access_key,
+          aws_secret_access_key:  Ploy.config.aws_secret_key,
+        )
+
+        server = ec2.servers.get(instance_id)
+        server.username = 'ubuntu'
+        server.private_key = File.read(
+          File.expand_path Ploy.config.aws_private_key_path
+        )
+        p [:server, server]
+
+        server.wait_for{ sshable?(ssh_options) }
+
+        p [:uploading_deploy_script, deploy_script]
+        server.scp StringIO.new(deploy_script), 'deploy.sh', ssh_options
+        p [:executing_deploy_script]
+        server.ssh("chmod +x deploy.sh && sudo ./deploy.sh", ssh_options) do |s|
+          s.output
+        end
+      end
+
+      desc "ssh", "SSH into the server"
+      def ssh(instance_id)
+        require_fog
+        ec2 = Fog::Compute.new(
+          provider: 'AWS',
+          aws_access_key_id:      Ploy.config.aws_access_key,
+          aws_secret_access_key:  Ploy.config.aws_secret_key,
+        )
+        server = ec2.servers.get(instance_id)
+        command = "ssh -i #{Ploy.config.aws_private_key_path} ubuntu@#{server.dns_name}"
+        puts command
+        exec command
+      end
+
+      protected
+
+      def require_fog
+        begin
+          require 'fog'
+        rescue LoadError
+          puts "fog is missing. `gem install fog` to use that command"
+          exit 1
+        end
       end
     end
+
+    desc "local SUBCOMMAND ...ARGS", "local commands"
+    subcommand "local", Local
 
     desc "version", "Prints the version of ploy"
     def version
