@@ -27,7 +27,7 @@ if [ ! -x "$DESTDIR/script/install" ] ; then
 fi
 
 cd "$DESTDIR"
-if ! tar czf ../$RELEASE_ID.tar.gz . ; then
+if ! tar czf "../$RELEASE_ID.tar.gz" . ; then
   fail "Archive creating issue ??"
 fi
 

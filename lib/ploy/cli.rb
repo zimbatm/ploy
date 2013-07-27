@@ -97,9 +97,11 @@ module Ploy
       desc "build", "Runs a local vagrant box to build the project. Only one build at a time"
       def build
         require 'erb'
+        app_basename = File.basename(Ploy.config.app_name)
+        hostname = app_basename + '-build'
         build_script = Ploy.build_script
         release_id = [
-          Ploy.config.app_name,
+          app_basename,
           Time.now.to_i,
           Ploy.config.app_branch,
           Ploy.config.app_commit_count,
@@ -109,7 +111,7 @@ module Ploy
         template = ERB.new(File.read(File.join(Ploy.data_dir, 'Vagrantfile.erb')))
         out = template.result(binding)
 
-        vagrant_dir = File.join(Ploy.config.app_root, '.ploy', File.basename(Ploy.config.app_name) + '-build')
+        vagrant_dir = File.join(Ploy.config.app_root, '.ploy', hostname)
 
         FileUtils.mkdir_p vagrant_dir
         File.open(vagrant_dir + '/Vagrantfile', 'w') do |f|
