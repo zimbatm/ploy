@@ -178,8 +178,10 @@ module Ploy
         p [:uploading_deploy_script, deploy_script]
         server.scp StringIO.new(deploy_script), 'deploy.sh', ssh_options
         p [:executing_deploy_script]
-        server.ssh("chmod +x deploy.sh && sudo ./deploy.sh", ssh_options) do |s|
-          s.output
+        # FIXME: Run the deploy is the background with nohup
+        server.ssh("chmod +x deploy.sh && sudo ./deploy.sh", ssh_options) do |stdout, stderr|
+          $stdout.write stdout unless stdout.empty?
+          $stderr.write stderr unless stderr.empty?
         end
       end
 
