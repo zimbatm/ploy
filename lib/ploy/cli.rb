@@ -42,7 +42,8 @@ module Ploy
 
     desc "config", "Ploy configuration"
     def config
-      pp Ploy.config
+      puts "Ploy::Config"
+      puts Ploy.config
     end
 
     desc "account", "Gets account informations"

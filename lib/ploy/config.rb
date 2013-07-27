@@ -85,7 +85,7 @@ module Ploy
     def initialize(config)
       @config = config
       
-      self.class.attrs.each_pair do |key, key_rb|
+      attrs.each_pair do |key, key_rb|
         value = config[key] || ENV[key_rb.upcase]
         instance_variable_set("@#{key_rb}", value)
       end
@@ -93,6 +93,12 @@ module Ploy
 
     def app_short_commit
       app_commit[0..6]
+    end
+
+    def to_s
+      attrs.inject([]) do |ary, (key, key_rb)|
+        ary + ["#{key}=#{public_send(key_rb).inspect}"]
+      end.join("\n")
     end
 
     protected
