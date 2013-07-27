@@ -1,3 +1,4 @@
+require "bundler/gem_tasks"
 
 def ENV.to_config(keys)
   keys.inject({}) do |hash, key|
