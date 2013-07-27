@@ -59,6 +59,7 @@ module Ploy
         # Infer from origin repo
         app_repo = %x[git remote -v | grep origin].match(/origin\s*([^\s]+)/)
         app_repo &&= app_repo[1]
+        return nil unless app_repo
         if app_repo.include?('github.com')
           app_repo.match(%r[(?:git@|.*://)[^/:]+[:/](.*).git])[1]
         end
