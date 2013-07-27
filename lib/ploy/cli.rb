@@ -95,16 +95,26 @@ module Ploy
     class Local < Thor
       desc "build", "Runs a local vagrant box to build the project. Only one build at a time"
       def build
-        vagrant_dir = File.join(Ploy.data_dir, 'vagrant')
-        ENV['PLOY_BUILD_SCRIPT'] = Ploy.build_script
-        ENV['PLOY_APP_ROOT'] = Ploy.config.app_root
-        ENV['PLOY_RELEASE_ID'] = [
+        require 'erb'
+        build_script = Ploy.build_script
+        release_id = [
           Ploy.config.app_name,
           Time.now.to_i,
           Ploy.config.app_branch,
           Ploy.config.app_commit_count,
           Ploy.config.app_short_commit
         ].join('-')
+
+        template = ERB.new(File.read(File.join(Ploy.data_dir, 'Vagrantfile.erb')))
+        out = template.result(binding)
+
+        vagrant_dir = File.join(Ploy.config.app_root, '.ploy', File.basename(Ploy.config.app_name) + '-build')
+
+        FileUtils.mkdir_p vagrant_dir
+        File.open(vagrant_dir + '/Vagrantfile', 'w') do |f|
+          f.write out
+        end
+
         Dir.chdir(vagrant_dir) do
           system("vagrant up")
           system("vagrant destroy")
