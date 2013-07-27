@@ -50,9 +50,10 @@ fi
 # Make sure that no two scripts are running at the same time.
 lock /tmp/deploy.lock || fail "Another deploy is already running"
 
+mkdir -p $APP_ROOT
+
 # If we're on EC2
 if is_on_ec2 && ! mount | grep bind | grep /mnt/$APP_ROOT &>/dev/null ; then
-  mkdir -p $APP_ROOT
   mkdir -p /mnt/$APP_ROOT
   mount --bind /mnt/$APP_ROOT $APP_ROOT
 fi
