@@ -56,6 +56,7 @@ mkdir -p $APP_ROOT
 if is_on_ec2 && ! (mount | grep bind | grep /mnt$APP_ROOT) ; then
   mkdir -p /mnt$APP_ROOT
   mount --bind /mnt$APP_ROOT $APP_ROOT
+  echo /mnt$APP_ROOT $APP_ROOT bind defaults,bind 0 0 >> /etc/fstab
 fi
 
 # Copy itself to the deploy directory for reproductibility
