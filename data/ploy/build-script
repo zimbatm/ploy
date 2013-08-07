@@ -12,6 +12,8 @@ CACHE_DIR=$2
 DESTDIR=$3
 RELEASE_ID=`basename "$DESTDIR"`
 
+export XDG_CACHE_HOME=$CACHE_DIR
+
 echo "Preparing to build release '$RELEASE_ID'"
 
 if [ ! -x "$SOURCE_DIR/script/slugify" ]; then
