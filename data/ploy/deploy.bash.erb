@@ -97,3 +97,9 @@ else
   fi
   false
 fi
+
+log Cleaning old deploys
+for deploy_id in $(ls $APP_ROOT/deploy/ | sort -r | tail -n +5 | sort) ; do
+  log "Removing $deploy_id"
+  rm -rf $APP_ROOT/deploy/$deploy_id
+done
