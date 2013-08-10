@@ -37,6 +37,10 @@ fi
 if ! has ruby ; then
   install ruby1.9.1 ruby1.9.1-dev build-essential
 fi
+
+if ! has git ; then
+  install git
+fi
 SCRIPT
 end
 
