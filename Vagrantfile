@@ -41,6 +41,19 @@ fi
 if ! has git ; then
   install git
 fi
+
+if ! has bundler ; then
+  install libsqlite3-dev libcurl4-openssl-dev libxslt-dev libxml2-dev
+  sudo gem install bundler --no-ri --no-rdoc
+fi
+
+$APP_USER=vagrant
+mkdir -p /app/deploys
+mkdir -p /app/data
+chown $APP_USER:$APP_USER /app/data
+ln -sf /vagrant /app/deploys/deploy_id
+ln -sf /app/current /app/deploys/deploy_id
+
 SCRIPT
 end
 

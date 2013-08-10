@@ -64,16 +64,28 @@ module App
       has_many :targets
 
       def basename; File.basename(name); end
+
+      def build(commit_id, branch)
+        slug = slugs.create!(build_id: Time.now.to_i.to_s, commit_id: commit_id, branch: branch)
+
+        BuildWorker.perform_async(slug.id)
+      end
     end
 
     class Slug < Base
       include Common
+
+      VALID_STATES = %w[pending building complete]
 
       belongs_to :application
       validates_presence_of :build_id
       validates_presence_of :commit_id
       validates_presence_of :branch
       validates_presence_of :url
+
+      before_create :init_state
+
+      alias app application
 
       def public_url
         uri = URI.parse(url)
@@ -89,6 +101,24 @@ module App
         else
           fail "Unknown service: #{scheme}"
         end
+      end
+
+      def build_id
+        [app.basename,
+          Time.now.to_i,
+          branch,
+          # commit_count ?
+          short_commit].join('-')
+      end
+
+      def short_commit
+        commit_id[0..6]
+      end
+
+      protected
+
+      def init_state
+        self.state = 'pending'
       end
     end
 

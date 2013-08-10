@@ -40,13 +40,15 @@ class Init < ActiveRecord::Migration
 
     create_table :slugs, id: false do |t|
       t.string :id, limit: 36, null: false
-      t.string :url, null: false
+      t.string :application_id, limit: 36, null: false
+
+      t.string :state
 
       t.string :build_id, null: false
       t.string :commit_id, limit: 40, null: false
       t.string :branch, null: false
-
-      t.string :application_id, limit: 36, null: false
+      
+      t.string :url, null: false
 
       t.timestamps
       t.datetime :deleted_at
