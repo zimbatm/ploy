@@ -2,9 +2,9 @@
 # # vi: set ft=ruby :
 #
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu-13.04-server-amd64"
-  # config.vm.box_url =
-  #   "https://s3.amazonaws.com/mediacore-public/boxes/ec2-precise64.box"
+  config.vm.box = "raring-server-cloudimg-amd64"
+  config.vm.box_url =
+    "https://cloud-images.ubuntu.com/vagrant/raring/current/raring-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.hostname = "ployd"
   # Docker
   config.vm.network :forwarded_port, guest: 4243, host: 4243
