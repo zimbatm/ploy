@@ -75,7 +75,7 @@ module App
     class Slug < Base
       include Common
 
-      VALID_STATES = %w[pending building complete]
+      VALID_STATES = %w[pending building complete error]
 
       belongs_to :application
       validates_presence_of :build_id

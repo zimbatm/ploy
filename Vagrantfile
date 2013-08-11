@@ -6,7 +6,10 @@ Vagrant.configure("2") do |config|
   config.vm.box_url =
     "https://s3.amazonaws.com/mediacore-public/boxes/ec2-precise64.box"
   config.vm.hostname = "ployd"
+  # Docker
   config.vm.network :forwarded_port, guest: 4243, host: 4243
+  # API
+  config.vm.network :forwarded_port, guest: 9292, host: 9292
   config.vm.provision :shell,
     inline: <<SCRIPT
 set -e

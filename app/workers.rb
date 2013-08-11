@@ -42,11 +42,11 @@ module App
       slug = Slug.find(slug_id)
       slug.update_attribute :state, "building"
 
-      build_root = App.data_dir / :apps / slug.app.name
+      build_root = App.data_dir / 'apps' / slug.app.name
       build_root.mkdir_p
 
       build_id = slug.build_id
-      build_dir = build_root / :builds / build_id
+      build_dir = build_root / 'builds' / build_id
 
       source_repo = build_root / 'source_repo'
       raise "Repo not found" unless source_repo.directory?
