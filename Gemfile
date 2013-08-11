@@ -15,10 +15,6 @@ gem 'path'
 gem 'puma'
 gem 'rack-ssl'
 gem 'rake'
-gem 'sidekiq'
-gem 'sinatra'
-gem 'slim', '1.3.8'
-gem 'tilt', '1.3.7'
 
 group :development do
   gem 'pry'

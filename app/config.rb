@@ -1,7 +1,6 @@
 require 'fog'
 require 'lines'
 require 'path'
-require 'beaneater'
 
 module App
   class Config

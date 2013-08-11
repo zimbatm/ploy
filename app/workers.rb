@@ -1,6 +1,5 @@
 require 'app/models'
 require 'beaneater'
-require 'sidekiq'
 require 'tempfile'
 
 module App
@@ -14,9 +13,56 @@ module App
     end
   end
 
+  class BeanstalkWorker
+    class << self
+      attr_reader :tube_name
 
+      def set_tube(name)
+        @tube_name = name.to_s
+      end
+
+      def tube
+        fail "tube_name missing" unless tube_name
+        @tube ||= App.beanstalk.tubes[tube_name]
+      end
+
+      def set_model(model)
+        @model = model
+      end
+
+      def model
+        fail "model missing" unless @model
+        @model
+      end
+
+      def perform_async(model_instance)
+        tube.put(model_instance.id)
+      end
+    end
+
+    def run
+      App.beanstalk.jobs.register(self.class.tube_name) do |job|
+        process_job(job)
+      end
+      App.beanstalk.jobs.process!
+    end
+
+    def process_job(job)
+      model_instance = self.class.model.find(job.body)
+      perform model_instance
+      job.delete
+    rescue => ex
+      Lines.log ex
+      job.bury
+    end
+
+    def perform(model_instance)
+      raise NotImplementedError
+    end
+  end
+
+  # FIXME: Use the BeanstalkWorker
   class HostDeployWorker
-    include Sidekiq::Worker
     include App::Models
 
     def perform(deploy_id, host_id)
@@ -46,39 +92,11 @@ module App
     end
   end
 
-  class BuildWorker
+  class BuildWorker < BeanstalkWorker
     include App::Models
 
-    class << self
-      attr_reader :tube
-
-      def set_tube(name)
-        @tube = App.beanstalk.tubes[name]
-      end
-
-      def perform_async(build)
-        tube.put(build.id)
-      end
-    end
-
     set_tube :builds
-
-    def run
-      App.beanstalk.jobs.register(self.class.tube.name) do |job|
-        process_job(job)
-      end
-      Lines.log :processing
-      App.beanstalk.jobs.process!
-    end
-
-    def process_job(job)
-      build = Build.find(job.body)
-      perform build
-      job.delete
-    rescue => ex
-      Lines.log ex
-      job.bury
-    end
+    set_model Build
 
     def perform(build)
       app = build.application
