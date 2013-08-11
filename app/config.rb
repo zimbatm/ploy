@@ -11,11 +11,17 @@ module App
         {adapter: 'sqlite3', database: (App.data_dir / 'dev.sqlite3').to_s}
       @env = (ENV['ENV'] || ENV['RACK_ENV'] || 'development').to_sym
       @beanstalk_pool = ['localhost:11300']
+      @slug_bucket_name = ENV['PLOY_SLUG_BUCKET_NAME']
+      @aws_access_key_id = ENV['AWS_ACCESS_KEY_ID']
+      @aws_secret_access_key = ENV['AWS_SECRET_ACCESS_KEY']
     end
 
     attr_reader :database
     attr_reader :env
     attr_reader :beanstalk_pool
+    attr_reader :slug_bucket_name
+    attr_reader :aws_access_key_id
+    attr_reader :aws_secret_access_key
   end
 
   class << self
@@ -35,8 +41,8 @@ Lines.context(app: 'ploy', env: App.config.env)
 Lines.use($stderr)
 
 Fog.credentials = {
-  aws_access_key_id: ENV['AWS_ACCESS_KEY'],
-  aws_secret_access_key: ENV['AWS_SECRET_KEY'],
+  aws_access_key_id: App.config.aws_access_key_id,
+  aws_secret_access_key: App.config.aws_secret_access_key,
 #  scheme: 'http',
 }
 

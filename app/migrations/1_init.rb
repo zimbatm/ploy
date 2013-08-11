@@ -45,6 +45,8 @@ class Init < ActiveRecord::Migration
       t.string :build_id, null: false
       t.string :commit_id, limit: 40, null: false
       t.string :branch, null: false
+
+      t.string :checksum
       
       t.string :url, null: false
 

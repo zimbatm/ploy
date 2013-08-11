@@ -4,9 +4,14 @@ require 'sidekiq'
 require 'tempfile'
 
 module App
-  @beanstalk = Beaneater::Pool.new(App.config.beanstalk_pool)
   class << self
-    attr_reader :beanstalk
+    def beanstalk
+      @beanstalk ||= Beaneater::Pool.new(App.config.beanstalk_pool)
+    end
+
+    def slug_directory
+      Fog::Storage[:aws].directories.get(App.config.slug_bucket_name)
+    end
   end
 
 
@@ -83,7 +88,7 @@ module App
 
       build.change_state("building")
 
-      build_root = App.data_dir / 'apps' / app.name
+      build_root = app.data_dir
       build_dir = build_root / 'builds' / build_id
       build_dir.mkdir_p
 
@@ -101,8 +106,21 @@ module App
 
       system("#{build_script} 2>&1 | tee #{build_dir}/build.log") || raise("build script error")
 
-      app.slugs.create!(build_id: build_id, commit_id: commit_id, branch: branch)
-      # TODO: Upload and create a slug
+      slug_path = build_dir / "#{build_id}.tar.gz"
+      fail "Slug not completed" unless slug_path.exist?
+
+      slug_checksum = File.read("#{slug_path}.md5sum").split(' ', 1).first
+
+      App.slug_directory.files.create(
+        "slugs/#{app.name}/#{build_id}.tar.gz",
+        body: File.open(slug_path),
+        multipart_chunk_size: 5 * 1024 * 1024,
+        content_type: 'application/x-gzip',
+        content_md5: slug_checksum,
+      )
+      App.slug_directory.upload()
+
+      app.slugs.create!(build_id: build_id, commit_id: commit_id, branch: branch, checksum: "md5:#{md5sum}")
 
       build.change_state("success")
     rescue

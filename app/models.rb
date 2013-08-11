@@ -65,6 +65,10 @@ module App
       has_many :builds
 
       def basename; File.basename(name); end
+
+      def data_dir
+        App.data_dir / 'apps' / name
+      end
     end
 
     class Slug < Base
@@ -174,20 +178,26 @@ module App
       self.primary_key = :id
       before_create :set_key
       before_create :init_state
+
+      validates_presence_of :application
+      validates_presence_of :commit_id
+      validates_presence_of :branch
       
       belongs_to :application
 
-      VALID_STATES = %[pending building success error]
+      VALID_STATES = %[pending building uploading success error]
 
       def change_state(new_state)
+        new_state = new_state.to_s
         fail "cannot transition from success" if state == "success"
+        fail "not a valid state" unless VALID_STATES.include?(new_state)
         update_attribute(:state, new_state)
       end
 
       protected
 
       def set_key
-        id = "#{Time.now.to_i.to_s}-#{application.name}-#{branch}-#{commit_id[0..6]}"
+        id = "#{Time.now.to_i.to_s}-#{application.basename}-#{branch}-#{commit_id[0..6]}"
         write_attribute(:id, id)
       end
 

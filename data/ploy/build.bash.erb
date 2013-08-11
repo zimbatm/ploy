@@ -19,7 +19,10 @@ indent() {
 cd $BUILD_DIR
 
 rm -rf source
-git clone -b $COMMIT_ID "$BARE_REPO" source
+git clone "$BARE_REPO" source
+cd source
+git checkout -b ploy-build $COMMIT_ID
+cd ..
 
 banner pull
 docker pull $BASE
@@ -39,4 +42,6 @@ ID=$(docker commit $ID)
 
 banner export $ID
 ID=$(docker run -d $ID -i -a stdout /bin/sh -c "cd /app/deploy && tar czf - ." > $BUILD_ID.tar.gz)
+
+md5sum $BUILD_ID.tar.gz > $BUILD_ID.tar.gz.md5sum
 
