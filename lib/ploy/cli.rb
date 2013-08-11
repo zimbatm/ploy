@@ -55,7 +55,7 @@ module Ploy
 
       desc "deploy", "Deploys"
       def deploy(env='staging')
-        pp client.post_app_deploy(options[:app], Ploy.config.app_commit, env)
+        pp client.post_app_deploy(options[:app], Ploy.config.app_commit_id, env)
       end
     end
 
@@ -87,7 +87,7 @@ module Ploy
           Time.now.to_i,
           Ploy.config.app_branch,
           Ploy.config.app_commit_count,
-          Ploy.config.app_short_commit
+          Ploy.config.app_short_commit_id
         ].join('-')
 
         template = ERB.new(File.read(File.join(Ploy.data_dir, 'Vagrantfile.erb')))

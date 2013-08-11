@@ -35,7 +35,7 @@ module Ploy
           config['app.root'] = app_root
           config['app.name'] ||= find_app_name
 
-          config['app.commit'] = %x[git log -n 1 | head -n 1 | cut -d ' ' -f 2].strip
+          config['app.commit_id'] = %x[git log -n 1 | head -n 1 | cut -d ' ' -f 2].strip
           config['app.commit_count'] = %x[git log --oneline | wc -l].strip.to_i
           config['app.branch'] = %x[git branch | grep -e '^* ' | cut -d ' ' -f 2].strip
         end
@@ -72,7 +72,7 @@ module Ploy
 
       app.name
       app.root
-      app.commit
+      app.commit_id
       app.commit_count
       app.branch
 
@@ -81,8 +81,6 @@ module Ploy
       aws.bucket
       aws.private_key_path
     ]
-
-    alias app_commit_id app_commit
 
     def initialize(config)
       @config = config
@@ -93,8 +91,8 @@ module Ploy
       end
     end
 
-    def app_short_commit
-      app_commit[0..6]
+    def app_short_commit_id
+      app_commit_id[0..6]
     end
 
     def to_s

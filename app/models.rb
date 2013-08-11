@@ -96,7 +96,7 @@ module App
         end
       end
 
-      def short_commit
+      def short_commit_id
         commit_id[0..6]
       end
     end
