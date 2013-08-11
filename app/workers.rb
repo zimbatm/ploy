@@ -1,8 +1,15 @@
 require 'app/models'
+require 'beaneater'
 require 'sidekiq'
 require 'tempfile'
 
 module App
+  @beanstalk = Beaneater::Pool.new(App.config.beanstalk_pool)
+  class << self
+    attr_reader :beanstalk
+  end
+
+
   class HostDeployWorker
     include Sidekiq::Worker
     include App::Models
@@ -35,18 +42,50 @@ module App
   end
 
   class BuildWorker
-    include Sidekiq::Worker
     include App::Models
 
-    def perform(slug_id)
-      slug = Slug.find(slug_id)
-      slug.update_attribute :state, "building"
+    class << self
+      attr_reader :tube
 
-      build_root = App.data_dir / 'apps' / slug.app.name
-      build_root.mkdir_p
+      def set_tube(name)
+        @tube = App.beanstalk.tubes[name]
+      end
 
-      build_id = slug.build_id
+      def perform_async(build)
+        tube.put(build.id)
+      end
+    end
+
+    set_tube :builds
+
+    def run
+      App.beanstalk.jobs.register(self.class.tube.name) do |job|
+        process_job(job)
+      end
+      Lines.log :processing
+      App.beanstalk.jobs.process!
+    end
+
+    def process_job(job)
+      build = Build.find(job.body)
+      perform build
+      job.delete
+    rescue => ex
+      Lines.log ex
+      job.bury
+    end
+
+    def perform(build)
+      app = build.application
+      build_id = build.id
+      commit_id = build.commit_id
+      branch = build.branch 
+
+      build.change_state("building")
+
+      build_root = App.data_dir / 'apps' / app.name
       build_dir = build_root / 'builds' / build_id
+      build_dir.mkdir_p
 
       source_repo = build_root / 'source_repo'
       raise "Repo not found" unless source_repo.directory?
@@ -54,21 +93,25 @@ module App
       #TODO: don't fetch if we have the commit
       system("git --git-dir #{source_repo} fetch") || raise("git fetch error")
 
-      build_data = Ploy.gen_build(build_dir, source_repo, slug.commit_id, build_id)
+      build_script = build_dir / 'build.sh'
 
-      build_dir.open('build.sh', 'w') do |f|
-        f.write build_data
+      File.open(build_script, 'w', 0755) do |f|
+        f.write Ploy.gen_build(build_dir, source_repo, commit_id, build_id)
       end
 
-      build_script = build_dir / 'build.sh'
-      build_script.chmod('0755')
+      system("#{build_script} 2>&1 | tee #{build_dir}/build.log") || raise("build script error")
 
-      system(build_script) || raise("build script error")
+      app.slugs.create!(build_id: build_id, commit_id: commit_id, branch: branch)
+      # TODO: Upload and create a slug
 
-      slug.update_attribute :state, "success"
+      build.change_state("success")
     rescue
-      slug.update_attribute :state, "error"
+      build.change_state("error")
       raise
     end
   end
+end
+
+if __FILE__ == $0
+  App::BuildWorker.new.run
 end

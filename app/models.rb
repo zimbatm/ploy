@@ -62,28 +62,21 @@ module App
 
       has_many :slugs
       has_many :targets
+      has_many :builds
 
       def basename; File.basename(name); end
-
-      def build(commit_id, branch)
-        slug = slugs.create!(build_id: Time.now.to_i.to_s, commit_id: commit_id, branch: branch)
-
-        BuildWorker.perform_async(slug.id)
-      end
     end
 
     class Slug < Base
       include Common
 
-      VALID_STATES = %w[pending building complete error]
+      # TODO: Add checksum
 
       belongs_to :application
       validates_presence_of :build_id
       validates_presence_of :commit_id
       validates_presence_of :branch
       validates_presence_of :url
-
-      before_create :init_state
 
       alias app application
 
@@ -103,22 +96,8 @@ module App
         end
       end
 
-      def build_id
-        [app.basename,
-          Time.now.to_i,
-          branch,
-          # commit_count ?
-          short_commit].join('-')
-      end
-
       def short_commit
         commit_id[0..6]
-      end
-
-      protected
-
-      def init_state
-        self.state = 'pending'
       end
     end
 
@@ -189,6 +168,32 @@ module App
     class Deploy < Base
       belongs_to :target
       belongs_to :slug
+    end
+
+    class Build < Base
+      self.primary_key = :id
+      before_create :set_key
+      before_create :init_state
+      
+      belongs_to :application
+
+      VALID_STATES = %[pending building success error]
+
+      def change_state(new_state)
+        fail "cannot transition from success" if state == "success"
+        update_attribute(:state, new_state)
+      end
+
+      protected
+
+      def set_key
+        id = "#{Time.now.to_i.to_s}-#{application.name}-#{branch}-#{commit_id[0..6]}"
+        write_attribute(:id, id)
+      end
+
+      def init_state
+        write_attribute(:state, "pending")
+      end
     end
   end
 

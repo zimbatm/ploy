@@ -49,6 +49,12 @@ if ! has redis-server ; then
   install redis-server
 fi
 
+if ! has beanstalkd ; then
+  install beanstalkd
+  sed -e 's/#START=yes/START=yes/g' -e /etc/default/beanstalkd
+  service beanstalkd start
+fi
+
 if ! has bundler ; then
   install libsqlite3-dev libcurl4-openssl-dev libxslt-dev libxml2-dev
   sudo gem install bundler --no-ri --no-rdoc
@@ -58,8 +64,12 @@ APP_USER=vagrant
 mkdir -p /app/deploys
 mkdir -p /app/data
 chown $APP_USER:$APP_USER /app/data
-ln -sf /vagrant /app/deploys/deploy_id
-ln -sf /app/deploys/deploy_id /app/current
+rm -rf /app/deploys/deploy_id
+ln -s /vagrant /app/deploys/deploy_id
+rm -rf /app/current
+ln -s /app/deploys/deploy_id /app/current
+
+chmod 777 /var/run/docker.sock
 
 SCRIPT
 end

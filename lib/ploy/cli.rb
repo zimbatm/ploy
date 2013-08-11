@@ -17,12 +17,13 @@ module Ploy
     end
 
     module ClientHelper
+      include Ploy::Errors
       protected
       def client
         return @client if @client
         require 'ploy/client'
-        host = Ploy.config.host
-        token = Ploy.config.token
+        host = Ploy.config.ploy_host
+        token = Ploy.config.ploy_token
         raise ConfigurationError, "Unknown host" unless host
         raise ConfigurationError, "Unknown token" unless token
         @client = Client.new(host: host, token: token)
@@ -56,6 +57,22 @@ module Ploy
       def deploy(env='staging')
         pp client.post_app_deploy(options[:app], Ploy.config.app_commit, env)
       end
+    end
+
+    class Build < Thor
+      include ClientHelper
+      class_option :app_name, banner: 'APP_NAME', default: Ploy.config.app_name
+
+      desc "create", "Builds a slug"
+      def create(commit_id=Ploy.config.app_commit_id, branch=Ploy.config.app_branch)
+        pp client.post_new_build(options[:app_name], commit_id, branch)
+      end
+
+      desc "list", "Lists the build jobs"
+      def list
+        pp client.get_build_list(options[:app_name])
+      end
+      #alias ls list
     end
 
     class Local < Thor
@@ -224,9 +241,11 @@ module Ploy
         pp client.get_providers
       end
 
-
       desc "app SUBCOMMAND ...ARGS", "manage the app"
       subcommand "app", App
+
+      desc "build SUBCOMMAND ...ARGS", "builds slugs"
+      subcommand "build", Build
 
       desc "local SUBCOMMAND ...ARGS", "local commands"
       subcommand "local", Local

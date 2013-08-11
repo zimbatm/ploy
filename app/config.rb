@@ -1,6 +1,7 @@
 require 'fog'
 require 'lines'
 require 'path'
+require 'beaneater'
 
 module App
   class Config
@@ -9,10 +10,12 @@ module App
         ENV['DATABASE_URL'] ||
         {adapter: 'sqlite3', database: (App.data_dir / 'dev.sqlite3').to_s}
       @env = (ENV['ENV'] || ENV['RACK_ENV'] || 'development').to_sym
+      @beanstalk_pool = ['localhost:11300']
     end
 
     attr_reader :database
     attr_reader :env
+    attr_reader :beanstalk_pool
   end
 
   class << self

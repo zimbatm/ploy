@@ -66,5 +66,17 @@ module App
       expose :updated_at
     end
 
+    class BuildJob < Grape::Entity
+      expose :id
+
+      expose :app_name
+      expose :build_id
+      expose :commit_id
+      expose :branch
+
+      expose :state
+    end
+
+
   end
 end

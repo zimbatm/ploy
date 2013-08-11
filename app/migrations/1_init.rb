@@ -42,8 +42,6 @@ class Init < ActiveRecord::Migration
       t.string :id, limit: 36, null: false
       t.string :application_id, limit: 36, null: false
 
-      t.string :state
-
       t.string :build_id, null: false
       t.string :commit_id, limit: 40, null: false
       t.string :branch, null: false
@@ -95,6 +93,20 @@ class Init < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    create_table :builds, id: false do |t|
+      t.string :id, null: false
+
+      t.string :application_id, limit: 36, null: false
+      t.string :commit_id, limit: 40, null: false
+      t.string :branch, null: false
+
+      t.string :state, null: false
+
+      t.timestamps
+    end
+    add_index :builds, :id, unique: true
+    add_index :builds, [:application_id, :state]
 
   end
 end

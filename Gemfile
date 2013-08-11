@@ -3,6 +3,7 @@ gemspec
 
 gem 'activerecord', '~> 4.0.x'
 gem 'bcrypt-ruby', require: 'bcrypt'
+gem 'beaneater'
 gem 'fog'
 gem 'foreman'
 gem 'grape'

@@ -17,11 +17,9 @@ indent() {
 }
 
 cd $BUILD_DIR
-exec >build.log
-exec 2>&1
 
 rm -rf source
-git clone -b $COMMIT_ID --depth 10 "$BARE_REPO" source
+git clone -b $COMMIT_ID "$BARE_REPO" source
 
 banner pull
 docker pull $BASE

@@ -82,6 +82,8 @@ module Ploy
       aws.private_key_path
     ]
 
+    alias app_commit_id app_commit
+
     def initialize(config)
       @config = config
 

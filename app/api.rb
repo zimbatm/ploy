@@ -109,6 +109,26 @@ module App
           present app
         end
 
+        namespace '/build' do
+          desc "Creates a new slug"
+          params do
+            requires :commit_id, type: String, desc: "Id of the commit to build"
+            requires :branch, type: String, desc: "Branch to build"
+          end
+          post do
+            build = app.builds.create!(commit_id: params[:commit_id], branch: params[:branch])
+            BuildWorker.perform_async(build)
+            present build
+          end
+
+          get do
+            present app.builds.all
+          end
+
+          get '/attach' do
+          end
+        end
+
         namespace '/slugs' do
           desc 'Returns all the slugs for the app'
           get do

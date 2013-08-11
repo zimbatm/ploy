@@ -34,8 +34,8 @@ namespace :db do
 
     provider = a.providers.create(
       name: 'build-service-staging',
-      ssh_private_key: `cat ~/.ssh/mcore-jonas.pem`.strip,
-      ssh_public_key: `cat ~/.ssh/mcore-jonas.pub`.strip,
+      ssh_private_key: 'totoooyoy',
+      ssh_public_key: 'yooooo',
       config: {
         provider: 'AWS',
         aws_access_key_id: ENV['AWS_ACCESS_KEY'],
@@ -43,7 +43,7 @@ namespace :db do
       }
     )
 
-    app = a.apps.create(name: 'zimbatm/build-service')
+    app = a.apps.create(name: 'zimbatm/ploy-example')
     app.targets.create(
       provider: provider,
       role: 'server',
