@@ -18,7 +18,7 @@ module Ploy
       def git_config
         @git_config ||= %x[git config -l].strip.lines.inject({}) do |conf, line|
           k,v = line.split('=', 2)
-          conf[k] = v
+          conf[k] = v.rstrip
           conf
         end
       end
@@ -84,7 +84,7 @@ module Ploy
 
     def initialize(config)
       @config = config
-      
+
       attrs.each_pair do |key, key_rb|
         value = config[key] || ENV[key_rb.upcase]
         instance_variable_set("@#{key_rb}", value)

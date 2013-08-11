@@ -5,9 +5,16 @@ require 'thor'
 require 'pp'
 
 module Ploy
-  # http://whatisthor.com/
-  class CLI < Thor
-    #### Extensions ####
+  module CLI
+    module HandleErrors
+      protected
+
+      def dispatch(meth, given_args, given_opts, config)
+        super
+      rescue Ploy::Error => ex
+        p ex
+      end
+    end
 
     module ClientHelper
       protected
@@ -20,45 +27,6 @@ module Ploy
         raise ConfigurationError, "Unknown token" unless token
         @client = Client.new(host: host, token: token)
       end
-    end
-    include ClientHelper
-    module HandleErrors
-      protected
-
-      def dispatch(meth, given_args, given_opts, config)
-        super
-      rescue Ploy::Error => ex
-        p ex
-      end
-    end
-    extend HandleErrors
-
-    desc "init", "Adds default slugify and install scripts in your project"
-    def init
-      raise PloyError, "Project not found" unless Ploy.config.app_root
-
-      system("cp -rv #{Ploy.bootstrap_dir}/* #{Ploy.config.app_root}")
-    end
-
-    desc "config", "Ploy configuration"
-    def config
-      puts "Ploy::Config"
-      puts Ploy.config
-    end
-
-    desc "account", "Gets account informations"
-    def account
-      pp client.get_account
-    end
-
-    desc "apps", "Gets applications"
-    def apps
-      pp client.get_apps
-    end
-
-    desc "providers", "Gets account-linked providers"
-    def providers
-      pp client.get_providers
     end
 
     class App < Thor
@@ -89,9 +57,6 @@ module Ploy
         pp client.post_app_deploy(options[:app], Ploy.config.app_commit, env)
       end
     end
-
-    desc "app SUBCOMMAND ...ARGS", "manage the app"
-    subcommand "app", App
 
     class Local < Thor
       desc "build", "Runs a local vagrant box to build the project. Only one build at a time"
@@ -224,13 +189,53 @@ module Ploy
       end
     end
 
-    desc "local SUBCOMMAND ...ARGS", "local commands"
-    subcommand "local", Local
+    # http://whatisthor.com/
+    class Main < Thor
+      #### Extensions ####
 
-    desc "version", "Prints the version of ploy"
-    def version
-      require 'ploy/version'
-      puts "Ploy v#{Ploy::VERSION}"
+      include ClientHelper
+      extend HandleErrors
+
+      desc "init", "Adds default slugify and install scripts in your project"
+      def init
+        raise PloyError, "Project not found" unless Ploy.config.app_root
+
+        system("cp -rv #{Ploy.bootstrap_dir}/* #{Ploy.config.app_root}")
+      end
+
+      desc "config", "Ploy configuration"
+      def config
+        puts "Ploy::Config"
+        puts Ploy.config
+      end
+
+      desc "account", "Gets account informations"
+      def account
+        pp client.get_account
+      end
+
+      desc "apps", "Gets applications"
+      def apps
+        pp client.get_apps
+      end
+
+      desc "providers", "Gets account-linked providers"
+      def providers
+        pp client.get_providers
+      end
+
+
+      desc "app SUBCOMMAND ...ARGS", "manage the app"
+      subcommand "app", App
+
+      desc "local SUBCOMMAND ...ARGS", "local commands"
+      subcommand "local", Local
+
+      desc "version", "Prints the version of ploy"
+      def version
+        require 'ploy/version'
+        puts "Ploy v#{Ploy::VERSION}"
+      end
     end
   end
 end
