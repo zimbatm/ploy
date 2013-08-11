@@ -125,7 +125,16 @@ module App
             present app.builds.all
           end
 
-          get '/attach' do
+          params do
+            requires :commit_id, type: String, desc: "Find build by commit_id"
+            optional :tail, type: Boolean, desc: "Follows changes in the file"
+          end
+          get '/logs' do
+            build = app.builds.where(commit_id: params[:commit_id]).order(:updated_at).first
+            halt 404 unless build
+            # TODO: support tail=true
+            body = File.open(build.data_dir / 'build.log')
+            [200, {'Content-Type' => 'text/plain'}, body]
           end
         end
 
