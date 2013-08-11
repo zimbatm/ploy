@@ -2,14 +2,16 @@
 # # vi: set ft=ruby :
 #
 Vagrant.configure("2") do |config|
-  config.vm.box = "raring-server-cloudimg-amd64"
+  config.vm.box = "raring64"
   config.vm.box_url =
-    "https://cloud-images.ubuntu.com/vagrant/raring/current/raring-server-cloudimg-amd64-vagrant-disk1.box"
+    "http://cloud-images.ubuntu.com/raring/current/raring-server-cloudimg-vagrant-amd64-disk1.box"
   config.vm.hostname = "ployd"
-  # Docker
-  config.vm.network :forwarded_port, guest: 4243, host: 4243
-  # API
-  config.vm.network :forwarded_port, guest: 5000, host: 5000
+  config.vm.network :forwarded_port, guest: 4243, host: 4243 # Docker
+  config.vm.network :forwarded_port, guest: 5000, host: 5000 # API
+  config.ssh.forward_agent = true
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "1024"]
+  end
   config.vm.provision :shell,
     inline: <<SCRIPT
 set -e
@@ -38,15 +40,11 @@ if ! has docker ; then
 fi
 
 if ! has ruby ; then
-  install ruby1.9.1 ruby1.9.1-dev build-essential
+  install ruby1.9.1
 fi
 
 if ! has git ; then
   install git
-fi
-
-if ! has redis-server ; then
-  install redis-server
 fi
 
 if ! has beanstalkd ; then
@@ -56,7 +54,7 @@ if ! has beanstalkd ; then
 fi
 
 if ! has bundler ; then
-  install libsqlite3-dev libcurl4-openssl-dev libxslt-dev libxml2-dev
+  install ruby1.9.1-dev libsqlite3-dev libcurl4-openssl-dev libxslt-dev libxml2-dev build-essential
   sudo gem install bundler --no-ri --no-rdoc
 fi
 
@@ -75,6 +73,8 @@ rm -rf /app/current
 ln -s /app/deploys/deploy_id /app/current
 
 chmod 777 /var/run/docker.sock
+
+echo alias "app='cd /app/current'" > /home/vagrant/.bash_aliases
 
 SCRIPT
 end
