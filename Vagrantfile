@@ -60,6 +60,11 @@ if ! has bundler ; then
   sudo gem install bundler --no-ri --no-rdoc
 fi
 
+# See: http://docs.docker.io/en/latest/installation/ubuntulinux/#ufw
+if has ufw ; then
+  dpkg -r ufw
+fi
+
 APP_USER=vagrant
 mkdir -p /app/deploys
 mkdir -p /app/data

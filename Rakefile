@@ -29,8 +29,8 @@ task :init => ['db:migrate'] do
     ssh_public_key: 'yooooo',
     config: {
       provider: 'AWS',
-      aws_access_key_id: ENV['AWS_ACCESS_KEY'],
-      aws_secret_access_key: ENV['AWS_SECRET_KEY'],
+      aws_access_key_id: ENV['AWS_ACCESS_KEY_ID'],
+      aws_secret_access_key: ENV['AWS_SECRET_ACCESS_KEY'],
     }
   )
 
@@ -41,7 +41,7 @@ task :init => ['db:migrate'] do
     env: 'staging',
     config: {
       run_list: ['recipe[build-service]'],
-      build_service: ENV.to_config(%w[AWS_ACCESS_KEY AWS_SECRET_KEY AWS_PRIVATE_KEY GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET])
+      build_service: ENV.to_config(%w[AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_PRIVATE_KEY GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET])
     }
   )
   app.data_dir.mkdir_p

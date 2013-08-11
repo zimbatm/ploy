@@ -120,7 +120,7 @@ module App
       )
       App.slug_directory.upload()
 
-      app.slugs.create!(build_id: build_id, commit_id: commit_id, branch: branch, checksum: "md5:#{md5sum}")
+      app.slugs.create!(build_id: build_id, commit_id: commit_id, branch: branch, url: 'TODO', checksum: "md5:#{md5sum}")
 
       build.change_state("success")
     rescue
