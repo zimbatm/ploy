@@ -80,7 +80,22 @@ module Ploy
 
       desc "slugs", "Slugs of an app"
       def slugs
-        pp client.get_app_slugs(options[:app])
+        slugs =  client.get_app_slugs(options[:app])
+        slugs.map! do |slug|
+          {
+            'id' => slug['id'],
+            'commit_id' => slug['commit_id'][0..6],
+            'branch' => slug['branch'],
+            'checksum' => slug['checksum'],
+          }
+        end
+
+        display_table(
+          slugs,
+          %w( id commit_id branch checksum),
+          ["ID", "Commit", "Branch", "Checksum"]
+        )
+
       end
 
       desc "targets", "Targets of an app"
