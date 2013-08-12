@@ -38,6 +38,7 @@ ID=$(docker commit $ID)
 banner build $ID
 ID=$(docker run -d $ID /bin/sh -c "/build/script/slugify /cache /app/deploy")
 docker attach $ID | indent
+docker wait $ID >/dev/null
 ID=$(docker commit $ID)
 
 banner export $ID

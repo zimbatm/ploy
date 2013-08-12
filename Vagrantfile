@@ -2,9 +2,8 @@
 # # vi: set ft=ruby :
 #
 Vagrant.configure("2") do |config|
-  config.vm.box = "raring64"
-  config.vm.box_url =
-    "http://cloud-images.ubuntu.com/raring/current/raring-server-cloudimg-vagrant-amd64-disk1.box"
+  config.vm.box = "ubuntu-13.04-server-amd64"
+  #config.vm.box_url =
   config.vm.hostname = "ployd"
   config.vm.network :forwarded_port, guest: 4243, host: 4243 # Docker
   config.vm.network :forwarded_port, guest: 5000, host: 5000 # API
@@ -63,6 +62,11 @@ if has ufw ; then
   dpkg -r ufw
 fi
 
+if ! grep "cgroup_enable" /etc/default/grub &>/dev/null ; then
+  sed -e 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"/g' -i /etc/default/grub
+  update-grub
+fi
+
 APP_USER=vagrant
 mkdir -p /app/deploys
 mkdir -p /app/data
@@ -75,6 +79,7 @@ ln -s /app/deploys/deploy_id /app/current
 chmod 777 /var/run/docker.sock
 
 echo alias "app='cd /app/current'" > /home/vagrant/.bash_aliases
+echo alias "be='bundle exec'" >> /home/vagrant/.bash_aliases
 
 SCRIPT
 end

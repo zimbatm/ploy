@@ -50,10 +50,6 @@ module App
     def process_job(job)
       model_instance = self.class.model.find(job.body)
       perform model_instance
-      job.delete
-    rescue => ex
-      Lines.log ex
-      job.bury
     end
 
     def perform(model_instance)
@@ -127,21 +123,23 @@ module App
       slug_path = build_dir / "#{build_id}.tar.gz"
       fail "Slug not completed" unless slug_path.exist?
 
-      slug_checksum = File.read("#{slug_path}.md5sum").split(' ', 1).first
+      slug_checksum = File.read("#{slug_path}.md5sum").split(' ', 2).first
+
+      p [:slug_checksum, slug_checksum]
 
       App.slug_directory.files.create(
-        "slugs/#{app.name}/#{build_id}.tar.gz",
+        key: "slugs/#{app.name}/#{build_id}.tar.gz",
         body: File.open(slug_path),
         multipart_chunk_size: 5 * 1024 * 1024,
         content_type: 'application/x-gzip',
         content_md5: slug_checksum,
       )
-      App.slug_directory.upload()
 
-      app.slugs.create!(build_id: build_id, commit_id: commit_id, branch: branch, url: 'TODO', checksum: "md5:#{md5sum}")
+      app.slugs.create!(build_id: build_id, commit_id: commit_id, branch: branch, url: 'TODO', checksum: "md5:#{slug_checksum}")
 
       build.change_state("success")
-    rescue
+    rescue => ex
+      Lines.log ex
       build.change_state("error")
       raise
     end
