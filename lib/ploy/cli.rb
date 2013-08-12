@@ -87,13 +87,14 @@ module Ploy
             'commit_id' => slug['commit_id'][0..6],
             'branch' => slug['branch'],
             'checksum' => slug['checksum'],
+            'url' => slug['url'],
           }
         end
 
         display_table(
           slugs,
-          %w( id commit_id branch checksum),
-          ["ID", "Commit", "Branch", "Checksum"]
+          %w( id commit_id branch checksum url),
+          ["ID", "Commit", "Branch", "Checksum", "Url"]
         )
 
       end
@@ -115,7 +116,9 @@ module Ploy
 
       desc "create", "Builds a slug"
       def create(commit_id=Ploy.config.app_commit_id, branch=Ploy.config.app_branch)
-        pp client.post_new_build(options[:app_name], commit_id, branch)
+        build =  client.post_new_build(options[:app_name], commit_id, branch)
+
+        display "----build--->  #{build['id']}"
       end
 
       desc "list", "Lists the build jobs"
@@ -125,6 +128,7 @@ module Ploy
         builds.map! do |build|
           {
             'id' => build['id'],
+            'created_at' => build['created_at'],
             'commit_id' => build['commit_id'][0..6], 
             'branch' => build['branch'],
             'state' => build['state'],
@@ -133,8 +137,8 @@ module Ploy
 
         display_table(
           builds,
-          %w( id commit_id branch state),
-          ["ID", "Commit", "Branch", "State"]
+          %w( id created_at commit_id branch state),
+          ["ID", "Build Time", "Commit", "Branch", "State"]
         )
       end
       #alias ls list

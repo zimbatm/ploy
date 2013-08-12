@@ -179,6 +179,8 @@ module App
       before_create :set_key
       before_create :init_state
 
+      default_scope { order("created_at DESC") }
+
       validates_presence_of :application
       validates_presence_of :commit_id
       validates_presence_of :branch

@@ -125,17 +125,24 @@ module App
 
       slug_checksum = File.read("#{slug_path}.md5sum").split(' ', 2).first
 
-      p [:slug_checksum, slug_checksum]
-
-      App.slug_directory.files.create(
+      file = App.slug_directory.files.create(
         key: "slugs/#{app.name}/#{build_id}.tar.gz",
         body: File.open(slug_path),
         multipart_chunk_size: 5 * 1024 * 1024,
         content_type: 'application/x-gzip',
         content_md5: slug_checksum,
-      )
+        acl: "private")
 
-      app.slugs.create!(build_id: build_id, commit_id: commit_id, branch: branch, url: 'TODO', checksum: "md5:#{slug_checksum}")
+      url = file.service.request_url(
+        :bucket_name => file.directory.key,
+        :object_name => file.key)
+
+      app.slugs.create!(
+        build_id: build_id,
+        commit_id: commit_id,
+        branch: branch,
+        url: url,
+        checksum: "md5:#{slug_checksum}")
 
       build.change_state("success")
     rescue => ex

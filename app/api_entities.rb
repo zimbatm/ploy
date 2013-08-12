@@ -37,6 +37,8 @@ module App
 
       expose :created_at
       expose :updated_at
+      expose :checksum
+      expose :url
     end
 
     class Provider < Grape::Entity
