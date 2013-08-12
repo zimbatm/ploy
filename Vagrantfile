@@ -53,7 +53,7 @@ if ! has beanstalkd ; then
   service beanstalkd start
 fi
 
-if ! has bundler ; then
+if ! has bundle ; then
   install ruby1.9.1-dev libsqlite3-dev libcurl4-openssl-dev libxslt-dev libxml2-dev build-essential
   sudo gem install bundler --no-ri --no-rdoc
 fi
