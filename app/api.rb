@@ -122,7 +122,7 @@ module App
           end
 
           get do
-            present app.builds.all
+            present app.builds
           end
 
           params do
