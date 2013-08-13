@@ -68,17 +68,15 @@ if ! grep "cgroup_enable" /etc/default/grub &>/dev/null ; then
   update-grub
 fi
 
-APP_USER=vagrant
-mkdir -p /app/deploys
-mkdir -p /app/data
-chown $APP_USER:$APP_USER /app/data
-rm -rf /app/deploys/deploy_id
-ln -s /vagrant /app/deploys/deploy_id
+# Fake deploy
+mkdir -p /app
 rm -rf /app/current
-ln -s /app/deploys/deploy_id /app/current
+ln -s /vagrant /app/current
 
+# Allow docker access from the app
 chmod 777 /var/run/docker.sock
 
+# Setup aliases
 echo alias "app='cd /app/current'" > /home/vagrant/.bash_aliases
 echo alias "be='bundle exec'" >> /home/vagrant/.bash_aliases
 

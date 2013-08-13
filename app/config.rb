@@ -7,7 +7,7 @@ module App
     def initialize
       @database =
         ENV['DATABASE_URL'] ||
-        {adapter: 'sqlite3', database: (App.data_dir / 'dev.sqlite3').to_s}
+        {adapter: 'sqlite3', database: (App.var_dir / 'dev.sqlite3').to_s}
       @env = (ENV['ENV'] || ENV['RACK_ENV'] || 'development').to_sym
       @beanstalk_pool = ['localhost:11300']
       @slug_bucket_name = ENV['PLOY_SLUG_BUCKET_NAME']
@@ -26,13 +26,13 @@ module App
   class << self
     attr_reader :config
     attr_reader :root_dir
-    attr_reader :data_dir
+    attr_reader :var_dir
 
     def log(*a, &b); Lines.log(*a, &b) end
   end
 
   @root_dir = Path('../..').expand(__FILE__)
-  @data_dir = File.directory?('/app/data') ? Path('/app/data') : @root_dir / 'var'
+  @var_dir = @root_dir / 'var'
   @config = Config.new
 end
 

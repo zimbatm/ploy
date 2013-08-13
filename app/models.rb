@@ -67,7 +67,7 @@ module App
       def basename; File.basename(name); end
 
       def data_dir
-        App.data_dir / 'apps' / name
+        App.var_dir / 'apps' / name
       end
     end
 
