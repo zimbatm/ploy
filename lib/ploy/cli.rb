@@ -141,7 +141,11 @@ module Ploy
           ["ID", "Build Time", "Commit", "Branch", "State"]
         )
       end
-      #alias ls list
+      
+      desc "logs", "Show the build logs"
+      def logs(build_id)
+        puts client.get_build_logs(options[:app_name], build_id)
+      end
     end
 
     class Local < Thor

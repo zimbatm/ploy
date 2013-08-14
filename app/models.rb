@@ -196,6 +196,10 @@ module App
         update_attribute(:state, new_state)
       end
 
+      def build_dir
+        application.data_dir / 'builds' / id
+      end
+
       protected
 
       def set_key

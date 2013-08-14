@@ -102,8 +102,7 @@ module App
 
       build.change_state("building")
 
-      build_root = app.data_dir
-      build_dir = build_root / 'builds' / build_id
+      build_dir = build.build_dir
       build_dir.mkdir_p
 
       source_repo = build_root / 'source_repo'

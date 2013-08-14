@@ -17,12 +17,12 @@ module Ploy
       )
     end
 
-    def get_build_log(app_name, commit_id, tail=false)
+    def get_build_logs(app_name, build_id, tail=false)
       request(
         expect: 200,
         method: :get,
         path: "/apps/#{app_name}/build/logs",
-        query: { commit_id: commit_id, tail: false }
+        query: { build_id: build_id, tail: false }
       )
     end
   end

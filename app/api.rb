@@ -126,15 +126,23 @@ module App
           end
 
           params do
-            requires :commit_id, type: String, desc: "Find build by commit_id"
+            requires :build_id, type: String, desc: "build_id"
             optional :tail, type: Boolean, desc: "Follows changes in the file"
           end
           get '/logs' do
-            build = app.builds.where(commit_id: params[:commit_id]).order(:updated_at).first
+            build = app.builds.find(params[:build_id])
+            p [:build, build]
             halt 404 unless build
-            # TODO: support tail=true
-            body = File.open(build.data_dir / 'build.log')
-            [200, {'Content-Type' => 'text/plain'}, body]
+            case build.state
+            when "pending"
+              halt 404
+            #when "success"
+              # TODO: get from S3
+            else
+              # TODO: support tail=true
+              body = File.open(build.build_dir / 'build.log')
+              [200, {'Content-Type' => 'text/plain'}, body]
+            end
           end
         end
 
