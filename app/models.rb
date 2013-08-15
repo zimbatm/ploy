@@ -25,9 +25,9 @@ module App
 
       has_many :tokens
 
+      validates_format_of   :name, with: /\A[\w\-\.]+\/[\w\-\.]+\z/
       validates_presence_of :email
       validates_format_of   :email, with: /.+@.+/
-
       validates_presence_of :hashed_password
 
       def password
