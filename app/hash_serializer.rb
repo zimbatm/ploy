@@ -1,3 +1,5 @@
+require 'json'
+
 module App
   # Used to serialize ActiveRecord field that should contain a {} Hash.
   class HashSerializer
@@ -20,14 +22,14 @@ module App
     # Returns an array of strings
     def load(serialized_data)
       return {} if serialized_data.nil?
-      MultiJson.load(serialized_data)
+      JSON.load(serialized_data)
     end
 
     def dump(hash_data)
       hash_data = hash_data.to_h if hash_data.respond_to?(:to_h)
       return nil unless hash_data.kind_of?(Hash)
 
-      data = MultiJson.dump(hash_data)
+      data = JSON.dump(hash_data)
       if data.bytesize > @max_size
         raise TooLarge, "Data is too large to be serialized"
       end

@@ -3,7 +3,7 @@ PATH
   specs:
     ploy (0.0.1)
       excon
-      multi_json
+      json
       thor
 
 GEM

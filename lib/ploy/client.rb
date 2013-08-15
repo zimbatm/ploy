@@ -1,6 +1,6 @@
 require 'base64'
 require 'excon'
-require 'multi_json'
+require 'json'
 
 require 'ploy/api/account'
 require 'ploy/api/app'
@@ -110,7 +110,7 @@ module Ploy
         end
 
         if response.headers['Content-Type'].to_s =~ /json/
-          response.body = MultiJson.decode(response.body)
+          response.body = JSON.decode(response.body)
         end
       end
 
