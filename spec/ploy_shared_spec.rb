@@ -1,9 +1,10 @@
-require 'ploy'
+require 'ploy/shared'
 require 'tempfile'
 
-describe Ploy do
+describe Ploy::Shared do
 
   describe ".gen_deploy" do
+    subject { o = Object.new; o.extend(Ploy::Shared); o }
     let(:tmp_file) { Tempfile.open('w') }
     after do
       tmp_file.unlink
@@ -11,7 +12,7 @@ describe Ploy do
 
     it 'generates a valid deploy' do
       pending("FIXME")
-      out = Ploy.gen_deploy(1337, "http://s3.amazonaws.com/releases/foo.tar.gz", {some: "config"}) 
+      out = subject.gen_deploy(1337, "http://s3.amazonaws.com/releases/foo.tar.gz", {some: "config"}) 
 
       tmp_file.write out
       tmp_file.close
@@ -25,6 +26,6 @@ describe Ploy do
   end
 
   it 'gives access to a bootstrap dir' do
-    expect( File.directory?(Ploy.bootstrap_dir) ).to be_true
+    expect( File.directory?(subject.bootstrap_dir) ).to be_true
   end
 end

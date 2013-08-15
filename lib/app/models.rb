@@ -1,11 +1,13 @@
 require 'active_record'
 require 'bcrypt'
 require 'fog'
-require 'app/generated_id'
-require 'app/hash_serializer'
 require 'lines/active_record'
 require 'paranoia'
 require 'uri'
+
+require 'app/config'
+require 'app/generated_id'
+require 'app/hash_serializer'
 
 module App
   module Models
@@ -25,7 +27,6 @@ module App
 
       has_many :tokens
 
-      validates_format_of   :name, with: /\A[\w\-\.]+\/[\w\-\.]+\z/
       validates_presence_of :email
       validates_format_of   :email, with: /.+@.+/
       validates_presence_of :hashed_password
@@ -59,6 +60,8 @@ module App
 
     class Application < Base
       include Common
+
+      validates_format_of   :name, with: /\A[\w\-\.]+\/[\w\-\.]+\z/
 
       has_many :slugs
       has_many :targets

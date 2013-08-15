@@ -1,6 +1,7 @@
-require 'app/models'
 require 'beaneater'
 require 'tempfile'
+
+require 'app/models'
 
 module App
   class << self

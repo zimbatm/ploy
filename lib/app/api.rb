@@ -1,8 +1,9 @@
+require 'base64'
+require 'grape'
+
 require 'app/api_entities'
 require 'app/models'
 require 'app/workers'
-require 'base64'
-require 'grape'
 
 module App
   class API < Grape::API

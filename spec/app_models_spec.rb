@@ -1,4 +1,3 @@
-require 'app/boot'
 require 'app/models'
 
 module App::Models

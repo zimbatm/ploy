@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
-libdir = File.expand_path('../../lib', __FILE__)
-$:.unshift(libdir) unless $:.include?(libdir)
-
+require File.expand_path('../../boot', __FILE__)
 require 'ploy/cli'
 
-Ploy::CLI::Main.start(ARGV)
+Ploy::CLI.start(ARGV)

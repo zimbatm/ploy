@@ -31,7 +31,7 @@ module App
     def log(*a, &b); Lines.log(*a, &b) end
   end
 
-  @root_dir = Path('../..').expand(__FILE__)
+  @root_dir = Path('../../..').expand(__FILE__)
   @var_dir = @root_dir / 'var'
   @config = Config.new
 end

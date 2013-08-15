@@ -1,9 +1,9 @@
-require 'ploy/config'
+require 'ploy/cli/config'
 
-module Ploy
+module Ploy::CLI
   describe Config do
     context 'when loaded' do
-      subject{ Ploy.config }
+      subject{ Ploy::CLI.config }
 
       its(:ploy_host) { should_not be_nil }
       its(:ploy_token) { should_not be_nil }

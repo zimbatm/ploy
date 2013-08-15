@@ -2,19 +2,20 @@ require 'base64'
 require 'excon'
 require 'json'
 
+require 'ploy'
 require 'ploy/api/account'
 require 'ploy/api/app'
 require 'ploy/api/build'
 require 'ploy/api/provider'
 require 'ploy/api/target'
-
-require 'ploy/errors'
 require 'ploy/version'
 
 module Ploy
-  module Errors
-    class ErrorWithResponse < SystemError
-      include Error
+  # Copyright MIT Heroku: https://github.com/heroku/heroku.rb/blob/master/lib/heroku/api.rb
+  class Client
+    include Ploy::API
+
+    class ErrorWithResponse < Ploy::SystemError
       attr_reader :response
 
       def initialize(message, response)
@@ -30,13 +31,7 @@ module Ploy
     class Timeout < ErrorWithResponse; end
     class Locked < ErrorWithResponse; end
     class RequestFailed < ErrorWithResponse; end
-
-    class ServiceNotAvailable < StandardError; include Error; end
-  end
-
-  # Copyright MIT Heroku: https://github.com/heroku/heroku.rb/blob/master/lib/heroku/api.rb
-  class Client
-    include API
+    class ServiceNotAvailable < Ploy::SystemError; include Error; end
 
     # Turns the response around so that response.body is the object
     # but you can still get access to the original response by calling +#response+
@@ -106,22 +101,22 @@ module Ploy
         response = @connection.request(params, &block)
       rescue Excon::Errors::HTTPStatusError => error
         klass = case error.response[:status]
-          when 401 then Ploy::Errors::Unauthorized
-          when 402 then Ploy::Errors::VerificationRequired
-          when 403 then Ploy::Errors::Forbidden
-          when 404 then Ploy::Errors::NotFound
-          when 408 then Ploy::Errors::Timeout
-          when 422 then Ploy::Errors::RequestFailed
-          when 423 then Ploy::Errors::Locked
-          when /50./ then Ploy::Errors::RequestFailed
-          else Ploy::Errors::ErrorWithResponse
+          when 401 then Ploy::Client::Unauthorized
+          when 402 then Ploy::Client::VerificationRequired
+          when 403 then Ploy::Client::Forbidden
+          when 404 then Ploy::Client::NotFound
+          when 408 then Ploy::Client::Timeout
+          when 422 then Ploy::Client::RequestFailed
+          when 423 then Ploy::Client::Locked
+          when /50./ then Ploy::Client::RequestFailed
+          else Ploy::Client::ErrorWithResponse
         end
 
         reerror = klass.new(error.message, error.response)
         reerror.set_backtrace(error.backtrace)
         raise(reerror)
       rescue Excon::Errors::SocketError => error
-        reerror = Ploy::Errors::ServiceNotAvailable.new(error.message)
+        reerror = Ploy::Client::ServiceNotAvailable.new(error.message)
         reerror.set_backtrace(error.backtrace)
         raise(reerror)
       end
@@ -132,7 +127,7 @@ module Ploy
         end
 
         if response.headers['Content-Type'].to_s =~ /json/
-          response.body = JSON.decode(response.body)
+          response.body = JSON.load(response.body)
         end
       end
 

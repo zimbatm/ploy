@@ -1,4 +1,3 @@
-require 'app/boot'
 require 'app/config'
 
 describe App::Config do

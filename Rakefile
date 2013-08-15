@@ -10,7 +10,7 @@ end
 task :default => :spec
 
 task :boot do
-  require File.expand_path('../app/boot', __FILE__)
+  require File.expand_path('../boot', __FILE__)
 end
 
 desc "Creates base architecture for testing"
@@ -53,8 +53,9 @@ end
 namespace :db do
   desc "Updates the database's model"
   task :migrate => :boot do
+    require 'app/models'
     require 'active_record'
-    ActiveRecord::Migrator.migrations_paths.replace([App.root_dir / 'app/migrations'])
+    ActiveRecord::Migrator.migrations_paths.replace([App.root_dir / 'lib/app/migrations'])
     ActiveRecord::Base.establish_connection(App.config.database)
     ActiveRecord::Migrator.migrate(ActiveRecord::Migrator.migrations_paths)
   end

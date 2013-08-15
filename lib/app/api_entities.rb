@@ -78,7 +78,5 @@ module App
 
       expose :state
     end
-
-
   end
 end
