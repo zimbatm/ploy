@@ -6,10 +6,43 @@ Vagrant.configure("2") do |config|
   config.vm.box_url =
     "https://s3.amazonaws.com/mediacore-public/boxes/ec2-precise64.box"
   config.vm.hostname = "<%= hostname %>"
-  config.vm.provision :shell do |shell|
-    shell.path = "<%= build_script %>"
-    shell.args = "/build /build/.ploy/cache /build/.ploy/slugs/<%= release_id %>"
-  end
+  config.vm.provision :shell,
+    inline: <<-SCRIPT
+set -e
+
+fail() {
+  echo $@ >&2
+  exit 1
+}
+
+RELEASE_ID=<%= release_id %>
+SOURCE_DIR=/build
+CACHE_DIR=/build/.ploy/cache
+DESTDIR=/build/.ploy/slugs/$RELEASE_ID
+
+export XDG_CACHE_HOME=$CACHE_DIR
+
+echo "Preparing to build release '$RELEASE_ID'"
+
+if [ ! -x "$SOURCE_DIR/script/slugify" ]; then
+  fail "We're missing a script/slugify script in the source"
+fi
+
+if ! "$SOURCE_DIR/script/slugify" "$CACHE_DIR" "$DESTDIR" ; then
+  fail "Build failure (see logs)"
+fi
+
+if [ ! -x "$DESTDIR/script/install" ] ; then
+  fail "We're missing a script/install script in the slug"
+fi
+
+cd "$DESTDIR"
+if ! tar czf "../$RELEASE_ID.tar.gz" . ; then
+  fail "Archive creating issue ??"
+fi
+
+echo "Build of slug '$RELEASE_ID' successful"
+SCRIPT
   config.vm.synced_folder File.expand_path('../../..', __FILE__), "/build"
   config.ssh.forward_agent = true
 end
