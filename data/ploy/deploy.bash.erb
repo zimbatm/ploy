@@ -5,15 +5,13 @@
 
 set -e
 
+### Generated config ###
+
 DEPLOY_ID="<%= deploy_id %>"
 SLUG_URL="<%= slug_url %>"
 CONFIG=<%= config.to_s.shellescape %>
 
-APP_ROOT=/app
-DEPLOY_PATH=$APP_ROOT/deploy/$DEPLOY_ID
-CURRENT_PATH=$APP_ROOT/current
-SLUG_FILE=$DEPLOY_PATH/`basename "$SLUG_URL" | sed 's/\?.*//'`
-CONFIG_FILE=$DEPLOY_PATH/config-file
+### Functions ###
 
 log() {
   echo "$DEPLOY_ID: $@"
@@ -26,6 +24,10 @@ fail() {
 
 has() {
   which $1 &>/dev/null
+}
+
+has_user() {
+  id -u $1 &>/dev/null
 }
 
 lock() {
@@ -43,20 +45,57 @@ is_on_ec2() {
   arp | grep fe:ff:ff:ff:ff:ff >/dev/null && wget -nv -t 1 -T 2 --spider http://169.254.169.254/1.0/
 }
 
+### Init ###
+
 if [ `id -u` != 0 ]; then
   fail "You need to be root to run this script"
 fi
 
+# Get current distrib data (only on Ubuntu apparently)
+if [ -f /etc/lsb-release ]; then
+  . /etc/lsb-release
+fi
+
+if [ "$DISTRIB_ID" != "Ubuntu" ]; then
+  fail "Sorry, this script only works on ubuntu !"
+fi
+
+### Vars ###
+
+APP_HOME=/app
+APP_USER=app
+if [ -d /vagrant ]; then
+  APP_USER=vagrant
+fi
+
+PLOY_ROOT=/ploy
+if is_on_ec2 ; then
+  PLOY_ROOT=/mnt/ploy
+fi
+
+DEPLOY_PATH=$PLOY_ROOT/deploys/$DEPLOY_ID
+SLUG_FILE=$DEPLOY_PATH/`basename "$SLUG_URL" | sed 's/\?.*//'`
+CONFIG_FILE=$DEPLOY_PATH/config-file
+DATA_DIR=$PLOY_ROOT/var
+
+### Actual deploy ###
+
+mkdir -p $PLOY_ROOT
+
 # Make sure that no two scripts are running at the same time.
-lock /tmp/deploy.lock || fail "Another deploy is already running"
+lock $PLOY_ROOT/deploy.lock || fail "Another deploy is already running"
 
-mkdir -p $APP_ROOT
+# Fix root on ubuntu AMIs
+if [ -f /home/ubuntu/.ssh/authorized_keys ] ; then
+  mkdir -p /root/.ssh
+  chmod 700 /root/.ssh
+  cp /home/ubuntu/.ssh/authorized_keys /root/.ssh
+  chown -R root:root /root/.ssh
+fi
 
-# If we're on EC2
-if is_on_ec2 && ! (mount | grep bind | grep /mnt$APP_ROOT) ; then
-  mkdir -p /mnt$APP_ROOT
-  mount --bind /mnt$APP_ROOT $APP_ROOT
-  echo /mnt$APP_ROOT $APP_ROOT bind defaults,bind 0 0 >> /etc/fstab
+if ! has_user $APP_USER ; then
+  adduser --system --home $APP_HOME --shell /bin/bash --no-create-home \
+    --gecos "App" --disabled-password $APP_USER
 fi
 
 # Copy itself to the deploy directory for reproductibility
@@ -72,34 +111,39 @@ log Fetching slug "$SLUG_URL"
 curl -L -o "$SLUG_FILE" "$SLUG_URL"
 tar --no-same-owner -xaf "$SLUG_FILE"
 
+# For now the convention is that var/ is the place where your app can share data
+mkdir -p $DATA_DIR
+chown $APP_USER:$APP_USER $DATA_DIR
+ln -sf $DATA_DIR $APP_HOME/var
+
 log Install starting
 ./script/install $CONFIG_FILE
 
-if [ -L $CURRENT_PATH ]; then
-  cp -df $CURRENT_PATH $CURRENT_PATH.old
+if [ -L $APP_HOME ]; then
+  cp -df $APP_HOME $APP_HOME.old
 fi
 
 # Atomically link the new release
-ln -sf $DEPLOY_PATH $CURRENT_PATH.new
-mv -f -T $CURRENT_PATH.new $CURRENT_PATH
+ln -sf $DEPLOY_PATH $APP_HOME.new
+mv -f -T $APP_HOME.new $APP_HOME
 
 log Running post-install script
-if [ ! -f $CURRENT_PATH/script/post-install ] || $CURRENT_PATH/script/post-install ; then
+if [ ! -f $APP_HOME/script/post-install ] || $APP_HOME/script/post-install ; then
   echo Deploy $DEPLOY_ID successful
-  if [ -L $CURRENT_PATH.old ]; then
-    rm $CURRENT_PATH.old
+  if [ -L $APP_HOME.old ]; then
+    rm $APP_HOME.old
   fi
 else
   echo Deploy $DEPLOY_ID failed
   # Revert link if the post-install didn't work
-  if [ -L $CURRENT_PATH.old ]; then
-    mv -f -T $CURRENT_PATH.old $CURRENT_PATH
+  if [ -L $APP_HOME.old ]; then
+    mv -f -T $APP_HOME.old $APP_HOME
   fi
   false
 fi
 
 log Cleaning old deploys
-for deploy_id in $(ls $APP_ROOT/deploy/ | sort -r | tail -n +5 | sort) ; do
+for deploy_id in $(ls $PLOY_ROOT/deploy/ | sort -r | tail -n +5 | sort) ; do
   log "Removing $deploy_id"
-  rm -rf $APP_ROOT/deploy/$deploy_id
+  rm -rf $PLOY_ROOT/deploy/$deploy_id
 done

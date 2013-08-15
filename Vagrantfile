@@ -69,15 +69,13 @@ if ! grep "cgroup_enable" /etc/default/grub &>/dev/null ; then
 fi
 
 # Fake deploy
-mkdir -p /app
-rm -rf /app/current
-ln -s /vagrant /app/current
+rm -rf /app
+ln -s /vagrant /app
 
 # Allow docker access from the app
 chmod 777 /var/run/docker.sock
 
 # Setup aliases
-echo alias "app='cd /app/current'" > /home/vagrant/.bash_aliases
 echo alias "be='bundle exec'" >> /home/vagrant/.bash_aliases
 
 SCRIPT
