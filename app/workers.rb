@@ -104,20 +104,23 @@ module App
 
       build_dir = build.build_dir
       build_dir.mkdir_p
+      cache_dir = build.cache_dir
+      source_repo = build.source_dir
 
-      source_repo = build_root / 'source_repo'
-      raise "Repo not found" unless source_repo.directory?
+      fail "Repo not found" unless source_repo.directory?
 
-      #TODO: don't fetch if we have the commit
-      system("git --git-dir #{source_repo} fetch") || raise("git fetch error")
+      unless has_commit source_repo, commit_id
+        system("git --git-dir #{source_repo} fetch") || fail("git fetch error")
+      end
+      fail "Commit #{commit_id} not found" unless has_commit(source_repo, commit_id)
 
       build_script = build_dir / 'build.sh'
 
       File.open(build_script, 'w', 0755) do |f|
-        f.write Ploy.gen_build(build_dir, source_repo, commit_id, build_id)
+        f.write Ploy.gen_build(cache_dir, source_repo, commit_id, build_id)
       end
 
-      system("#{build_script} 2>&1 | tee #{build_dir}/build.log") || raise("build script error")
+      system("#{build_script} 2>&1 | tee #{build_dir}/build.log") || fail("build script error")
 
       slug_path = build_dir / "#{build_id}.tar.gz"
       fail "Slug not completed" unless slug_path.exist?
@@ -148,6 +151,12 @@ module App
       Lines.log ex
       build.change_state("error")
       raise
+    end
+
+    protected
+
+    def has_commit(source_repo, commit_id)
+      system "git --git-dir #{source_repo} cat-file -t #{commit_id}"
     end
   end
 end

@@ -200,6 +200,14 @@ module App
         application.data_dir / 'builds' / id
       end
 
+      def cache_dir
+        application.data_dir / 'cache'
+      end
+
+      def source_dir
+        application.data_dir / 'source_repo'
+      end
+
       protected
 
       def set_key

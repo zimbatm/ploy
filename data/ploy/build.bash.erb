@@ -1,15 +1,15 @@
 #!/bin/bash
 
 set -e
+cd `dirname $0`
 
-BUILD_DIR="<%= build_dir %>"
 BARE_REPO="<%= source_dir %>"
-COMMIT_ID="<%= commit_id %>"
+BASE="ubuntu:precise"
+BUILD_DIR=$PWD
 BUILD_ID="<%= build_id %>"
-
-cd $BUILD_DIR
-
-BASE=`cat ../last_build || echo ubuntu:precise`
+CACHE_DIR="<%= cache_dir %>"
+COMMIT_ID="<%= commit_id %>"
+LAST_CONTAINER=$CACHE_DIR/last_container_id
 
 banner() {
   echo "=========| $@ |========="
@@ -20,36 +20,40 @@ indent() {
 }
 
 commit() {
-  docker wait $ID >/dev/null
-  local ID=$(docker commit $1); echo $ID > ../last_build; echo $ID
+  local exit_status=$(docker wait $ID)
+  if [ $exit_status -gt 0 ]; then
+    return $exit_status
+  fi
+  ID=$(docker commit $ID)
+  echo $ID > $LAST_CONTAINER
 }
 
-rm -rf source
-git clone "$BARE_REPO" source
-cd source
-git checkout -b ploy-build $COMMIT_ID
-cd ..
+mkdir -p $CACHE_DIR
+ID=`cat $LAST_CONTAINER || true`
+if [ -z "$ID" ]; then
+  banner starting from $BASE
+  docker pull $BASE
+  ID=$BASE
+  ID=$(docker run -d "$ID" /bin/sh -c "mkdir -p /cache")
+  commit
+else
+  banner restarting from container $ID
+  ID=$(docker run -d "$ID" /bin/sh -c "rm -rf /app /source && mkdir -p /app /source")
+  commit
+fi
 
-banner pull
-docker pull $BASE
+banner prepare commit $COMMIT_ID
+ID=$(docker run -d -v "$CACHE_DIR:/cache" -i "$ID" /bin/sh -c "tar -x -C /source")
+git --git-dir "$BARE_REPO" archive $COMMIT_ID | docker attach $ID
+commit
 
-banner prepare
-ID=$(docker run "$BASE" /bin/sh -c "rm -rf /build && mkdir -p /cache /build && tar -x -C /build")
-ID=$(commit $ID)
-
-banner copy source $COMMIT_ID
-# TODO: Make a git checkout instead
-# TODO: Use the mount option
-ID=$(git --git-dir source/.git archive $COMMIT_ID | docker run -i -a stdin "$BASE" /bin/sh -c "mkdir -p /cache /build && tar -x -C /build")
-ID=$(commit $ID)
-
-banner build $ID
-ID=$(docker run -d $ID /bin/sh -c "/build/script/slugify /cache /app/deploy")
+banner build container $ID
+ID=$(docker run -d $ID /bin/sh -c "/source/script/slugify /cache /app")
 docker attach $ID | indent
-ID=$(commit $ID)
+commit
 
-banner export $ID
-ID=$(docker run -d $ID -i -a stdout /bin/sh -c "cd /app/deploy && tar czf - ." > $BUILD_ID.tar.gz)
-
-md5sum $BUILD_ID.tar.gz > $BUILD_ID.tar.gz.md5sum
-
+banner export build $BUILD_ID
+ARCHIVE=$BUILD_ID.tar.gz
+docker run $ID -a stdout /bin/sh -c "cd /app && tar czf - ." > $ARCHIVE
+shasum -a 256 $ARCHIVE > $ARCHIVE.sha256
+md5sum $ARCHIVE > $ARCHIVE.md5sum

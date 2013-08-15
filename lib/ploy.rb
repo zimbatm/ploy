@@ -31,7 +31,7 @@ module Ploy
     gen_deploy(deploy_id, slug_url, config)
   end
 
-  def gen_build(build_dir, source_dir, commit_id, build_id)
+  def gen_build(cache_dir, source_dir, commit_id, build_id)
     require 'erb'
     require 'shellwords'
     template = ERB.new(File.read(File.join(data_dir, 'build.bash.erb')))
