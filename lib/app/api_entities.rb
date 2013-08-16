@@ -68,7 +68,7 @@ module App
       expose :updated_at
     end
 
-    class BuildJob < Grape::Entity
+    class Build < Grape::Entity
       expose :id
 
       expose :app_name

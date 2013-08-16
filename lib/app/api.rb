@@ -19,6 +19,7 @@ module App
     represent Slug, with: Entities::Slug
     represent Target, with: Entities::Target
     represent Token, with: Entities::Token
+    represent Build, with: Entities::Build
 
     rescue_from ActiveRecord::RecordNotUnique do |e|
       Rack::Response.new('Already exists', 400)
@@ -55,15 +56,15 @@ module App
     desc "Exposes the user's account informations", {
       object_fields: Entities::Account.documentation
     }
-    get '/account' do
-      present account
-    end
+    namespace '/account' do
+      get do
+        present account
+      end
 
-    namespace '/tokens' do
       desc "Returns the account's tokens", {
         object_fields: Entities::Token.documentation
       }
-      get do
+      get '/tokens' do
         present account.tokens
       end
     end

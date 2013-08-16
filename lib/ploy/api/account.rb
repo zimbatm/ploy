@@ -9,12 +9,12 @@ module Ploy
       )
     end
 
-    # GET /tokens
-    def get_tokens
+    # GET /account/tokens
+    def get_account_tokens
       request(
         expects: 200,
         method: :get,
-        path: "/tokens",
+        path: "/account/tokens",
       )
     end
   end
