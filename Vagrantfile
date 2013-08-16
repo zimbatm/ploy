@@ -55,7 +55,11 @@ fi
 
 if ! has bundle ; then
   install ruby1.9.1-dev libsqlite3-dev libcurl4-openssl-dev libxslt-dev libxml2-dev build-essential
-  sudo gem install bundler --no-ri --no-rdoc
+  gem install bundler --no-ri --no-rdoc
+fi
+
+if ! has foreman ; then
+  gem install foreman --no-ri --no-rdoc
 fi
 
 # See: http://docs.docker.io/en/latest/installation/ubuntulinux/#ufw
