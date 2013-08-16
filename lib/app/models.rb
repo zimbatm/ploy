@@ -151,8 +151,6 @@ module App
       belongs_to :slug
       belongs_to :provider
 
-      serialize :config, HashSerializer.new
-
       def hosts
         provider.servers_for_target(self)
       end

@@ -39,10 +39,9 @@ task :init => ['db:migrate'] do
     provider: provider,
     role: 'server',
     env: 'staging',
-    config: {
-      run_list: ['recipe[build-service]'],
-      build_service: ENV.to_config(%w[AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_PRIVATE_KEY GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET])
-    }
+    config: JSON.dump(
+      run_list: ['recipe[ploy-example]']
+    )
   )
   app.data_dir.mkdir_p
   app.data_dir.chdir do
