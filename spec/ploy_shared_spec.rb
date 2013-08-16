@@ -2,9 +2,9 @@ require 'ploy/shared'
 require 'tempfile'
 
 describe Ploy::Shared do
+  subject { Class.new{ include Ploy::Shared; self}.new }
 
   describe ".gen_deploy" do
-    subject { o = Object.new; o.extend(Ploy::Shared); o }
     let(:tmp_file) { Tempfile.open('w') }
     after do
       tmp_file.unlink
