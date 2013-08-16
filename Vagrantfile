@@ -49,9 +49,8 @@ fi
 
 if ! has beanstalkd ; then
   install beanstalkd
-  sed -e 's/#START=yes/START=yes/g' -i /etc/default/beanstalkd
-  service beanstalkd start
 fi
+service beanstalkd stop || true
 
 if ! has bundle ; then
   install ruby1.9.1-dev libsqlite3-dev libcurl4-openssl-dev libxslt-dev libxml2-dev build-essential
