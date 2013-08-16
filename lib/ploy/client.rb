@@ -55,7 +55,6 @@ module Ploy
 
     OPTIONS = {
       headers:  {},
-      host:     'localhost',
       nonblock: false,
       scheme:   'http',
     }
@@ -64,8 +63,10 @@ module Ploy
       options = OPTIONS.merge(options)
 
       @scheme = options.delete(:scheme)
-      @host = options.delete(:host) || ENV['PLOY_HOST']
-      @token = options.delete(:token) || ENV['PLOY_TOKEN']
+      @host = options.delete(:host)
+      @token = options.delete(:token)
+      raise ArgumentError, "host option missing" unless @host
+      raise ArgumentError, "token option missing" unless @token
 
       options[:headers] = HEADERS.merge({
         'Authorization' => "Basic #{Base64.encode64(@token + ':').rstrip}",
