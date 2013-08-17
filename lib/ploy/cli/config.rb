@@ -1,94 +1,120 @@
+require 'ploy/env_config'
 require 'ploy/cli/errors'
 
 module Ploy
   module CLI
-    class Config
-      class << self
-        def attrs(*attrs)
-          @attrs ||= {}
-
-          attrs.flatten.each do |attr_|
-            key_rb = attr_.gsub('.', '_')
-            @attrs[attr_] = key_rb
-            attr_reader(key_rb)
-          end
-
-          @attrs
+    # Small wrapper class around the command line that handles loading 
+    # config from git
+    class GitConfig
+      def self.find_git_dir(work_dir)
+        path = File.expand_path(work_dir)
+        while path != "/"
+          git_dir = File.join(path, ".git")
+          return git_dir if File.directory? git_dir
+          path = File.dirname(path)
         end
+        nil
+      end
 
-        def git_config
-          @git_config ||= %x[git config -l].strip.lines.inject({}) do |conf, line|
-            k,v = line.split('=', 2)
-            conf[k] = v.rstrip
-            conf
-          end
-        end
+      def self.find(work_dir=Dir.pwd)
+        git_dir = find_git_dir(work_dir)
+        new(git_dir) if git_dir
+      end
 
-        def load
-          unless system("git status >/dev/null 2>&1")
-            raise ConfigurationError, "git or repo not found"
-          end
+      attr_reader :git_dir
 
-          config = git_config
+      def initialize(git_dir)
+        @git_dir = git_dir
+      end
 
-          app_root = find_up('.git', Dir.pwd)
-          if app_root
-            config['app.root'] = app_root
-            config['app.name'] ||= find_app_name
+      def find_key(ruby_key)
+        re = Regexp.new('^' + ruby_key.gsub('_', '[\._]') + '$')
+        keys = config.keys.grep(re)
+        raise LogicError if keys.size > 1
+        keys.first
+      end
 
-            config['app.commit_id'] = %x[git log -n 1 | head -n 1 | cut -d ' ' -f 2].strip
-            config['app.commit_count'] = %x[git log --oneline | wc -l].strip.to_i
-            config['app.branch'] = %x[git branch | grep -e '^* ' | cut -d ' ' -f 2].strip
-          end
+      def get(git_key)
+        config[git_key]
+      end
 
-          new(config)
-        end
-
-        protected
-
-        def find_up(name, start_path)
-          path = File.expand_path(start_path)
-          while path != "/"
-            return path if File.exists?(File.join(path, name))
-            path = File.dirname(path)
-          end
-          nil
-        end
-
-        # Funky heuristic
-        def find_app_name
-          # Infer from origin repo
-          app_repo = %x[git remote -v | grep origin].match(/origin\s*([^\s]+)/)
-          app_repo &&= app_repo[1]
-          return nil unless app_repo
-          if app_repo.include?('github.com')
-            app_repo.match(%r[(?:git@|.*://)[^/:]+[:/](.*).git])[1]
-          end
+      # Funky heuristic
+      def app_name_from_remote
+        # Infer from origin repo
+        repo_url = get('remote.origin.url')
+        return nil unless repo_url
+        if repo_url.include?('github.com')
+          repo_url.match(%r[(?:git@|.*://)[^/:]+[:/](.*).git])[1]
         end
       end
 
-      attrs %w[
-        ploy.host
-        ploy.token
+      def commit_id
+        git("log -n 1 | head -n 1 | cut -d ' ' -f 2")
+      end
 
-        app.name
-        app.root
-        app.commit_id
-        app.commit_count
-        app.branch
+      def commit_count
+        git("log --oneline | wc -l")
+      end
 
-        aws.access_key
-        aws.secret_key
-        aws.bucket
-        aws.private_key_path
+      def branch
+        git("branch | grep -e '^* ' | cut -d ' ' -f 2")
+      end
+
+      protected
+
+      def config
+        @config ||= git("config -l").lines.inject({}) do |conf, line|
+          k,v = line.split('=', 2)
+          conf[k] = v.rstrip
+          conf
+        end
+      end
+
+      def git(command)
+        %x[git --git-dir #{@git_dir} #{command}].strip
+      end
+    end
+
+    class Config < EnvConfig
+      set_keys %w[
+        ploy_host
+        ploy_token
+
+        app_branch
+        app_commit_count
+        app_commit_id
+        app_name
+        app_root
+
+        aws_access_key_id
+        aws_secret_access_key
+        aws_bucket
+        aws_private_key_path
       ]
+      forward_key :app_basename
+      forward_key :app_short_commit_id
 
-      def initialize(config)
-        @config = config
+      class << self
+        def from_git(work_dir=Dir.pwd)
+          git = GitConfig.find(work_dir)
+          return {} unless git
 
-        attrs.each_pair do |key, key_rb|
-          value = config[key] || ENV[key_rb.upcase]
-          instance_variable_set("@#{key_rb}", value)
+          config = keys.inject({}) do |c, rb_key|
+            git_key = git.find_key(rb_key)
+            c[rb_key] = git.get(git_key) if git_key
+            c
+          end
+          config['app_root'] = File.dirname(git.git_dir)
+          config['app_name'] ||= git.app_name_from_remote
+
+          config['app_commit_id'] = git.commit_id
+          config['app_commit_count'] = git.commit_count
+          config['app_branch'] = git.branch
+          config
+        end
+
+        def load(work_dir=Dir.pwd, env=ENV)
+          new(from_git(work_dir).merge from_env(env))
         end
       end
 
@@ -99,22 +125,12 @@ module Ploy
       def app_short_commit_id
         app_commit_id[0..6]
       end
-
-      def to_s
-        attrs.inject([]) do |ary, (key, key_rb)|
-          ary + ["#{key}=#{public_send(key_rb).inspect}"]
-        end.join("\n")
-      end
-
-      protected
-
-      def attrs
-        self.class.attrs
-      end
     end
 
-    def self.config
-      @config ||= Config.load
+    class << self
+      attr_reader :config
     end
+    @config = Config.load
+    @config.install(CLI)
   end
 end

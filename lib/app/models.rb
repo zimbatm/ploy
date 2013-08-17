@@ -77,8 +77,6 @@ module App
     class Slug < Base
       include Common
 
-      # TODO: Add checksum
-
       belongs_to :application
       validates_presence_of :build_id
       validates_presence_of :commit_id
@@ -225,4 +223,4 @@ module App
   include Models
 end
 
-ActiveRecord::Base.establish_connection(App.config.database)
+ActiveRecord::Base.establish_connection(App.config.database_url)

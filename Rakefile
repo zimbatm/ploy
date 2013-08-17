@@ -55,7 +55,6 @@ namespace :db do
     require 'app/models'
     require 'active_record'
     ActiveRecord::Migrator.migrations_paths.replace([App.root_dir / 'lib/app/migrations'])
-    ActiveRecord::Base.establish_connection(App.config.database)
     ActiveRecord::Migrator.migrate(ActiveRecord::Migrator.migrations_paths)
   end
 end
