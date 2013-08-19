@@ -2,6 +2,7 @@ require 'beaneater'
 require 'tempfile'
 
 require 'app/models'
+require 'ploy'
 
 module App
   class << self

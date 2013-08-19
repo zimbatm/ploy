@@ -8,22 +8,22 @@ module Ploy
 
       desc "create", "Builds a slug"
       def create(commit_id=CLI.config.app_commit_id, branch=CLI.config.app_branch)
-        build =  client.post_new_build(options[:app_name], commit_id, branch)
+        resp =  client.post_new_build(options[:app_name], commit_id, branch)
 
-        display "----build--->  #{build['id']}"
+        display "----build--->  #{resp['build']['id']}"
       end
 
       desc "list", "Lists the build jobs"
       def list
-        builds = client.get_build_list(options[:app_name])
+        resp = client.get_build_list(options[:app_name])
 
-        builds.map! do |build|
+        builds = resp['builds'].map do |build|
           {
-            'id' => build['id'],
-            'created_at' => build['created_at'],
-            'commit_id' => build['commit_id'][0..6], 
-            'branch' => build['branch'],
-            'state' => build['state'],
+            'id'          => build['id'],
+            'created_at'  => build['created_at'],
+            'commit_id'   => build['commit_id'][0..6], 
+            'branch'      => build['branch'],
+            'state'       => build['state'],
           }
         end
 

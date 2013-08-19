@@ -21,8 +21,8 @@ module Ploy
 
       desc "slugs", "Slugs of an app"
       def slugs
-        slugs =  client.get_app_slugs(options[:app])
-        slugs.map! do |slug|
+        resp =  client.get_app_slugs(options[:app])
+        slugs = resp['slugs'].map do |slug|
           {
             'id' => slug['id'],
             'commit_id' => slug['commit_id'][0..6],
