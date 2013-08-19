@@ -66,6 +66,7 @@ if has ufw ; then
   dpkg -r ufw
 fi
 
+# Optional docker config
 if ! grep "cgroup_enable" /etc/default/grub &>/dev/null ; then
   sed -e 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"/g' -i /etc/default/grub
   update-grub
@@ -80,6 +81,9 @@ chmod 777 /var/run/docker.sock
 
 # Setup aliases
 echo alias "be='bundle exec'" >> /home/vagrant/.bash_aliases
+
+# Bundle
+su -c "cd /app && bundle" vagrant
 
 SCRIPT
 end
