@@ -25,6 +25,10 @@ module App
       Rack::Response.new('Already exists', 400)
     end
 
+    after do
+      ActiveRecord::Base.clear_active_connections!
+    end
+
     helpers do
       def basic_pair
         env['HTTP_AUTHORIZATION'].to_s =~ /Basic ([^\s]+)/

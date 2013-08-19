@@ -34,7 +34,11 @@ module App
       @env = (ENV['ENV'] || ENV['RACK_ENV'] || 'development').to_sym
       @beanstalk_pool = (@beanstalk_pool || 'localhost:11300').split(',')
       @database_url ||=
-        {adapter: 'sqlite3', database: (var_dir / "#{env}.sqlite3").to_s}
+        {
+          adapter: 'sqlite3',
+          database: (var_dir / "#{env}.sqlite3").to_s,
+          pool: 20
+        }
     end
   end
 
