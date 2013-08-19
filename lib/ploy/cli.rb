@@ -25,9 +25,9 @@ module Ploy
 
       desc "init", "Adds default slugify and install scripts in your project"
       def init
-        raise PloyError, "Project not found" unless CLI.config.app_root
+        raise PloyError, "Project not found" unless CLI.app_root
 
-        system("cp -rv #{Ploy.bootstrap_dir}/* #{CLI.config.app_root}")
+        system("cp -rv #{Ploy.bootstrap_dir}/* #{CLI.app_root}")
       end
 
       desc "config", "Ploy configuration"

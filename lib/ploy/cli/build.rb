@@ -4,10 +4,10 @@ module Ploy
   module CLI
     class Build < Thor
       include Helpers
-      class_option :app_name, banner: 'APP_NAME', default: CLI.config.app_name
+      class_option :app_name, banner: 'APP_NAME', default: CLI.app_name
 
       desc "create", "Builds a slug"
-      def create(commit_id=CLI.config.app_commit_id, branch=CLI.config.app_branch)
+      def create(commit_id=CLI.app_commit_id, branch=CLI.app_branch)
         resp =  client.post_new_build(options[:app_name], commit_id, branch)
 
         display "----build--->  #{resp['build']['id']}"

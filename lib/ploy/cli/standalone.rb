@@ -8,18 +8,18 @@ module Ploy
     class Standalone < Thor
       desc "build", "Runs a local vagrant box to build the project. Only one build at a time"
       def build
-        app_basename = CLI.config.app_basename
+        app_basename = CLI.app_basename
         hostname = app_basename + '-build'
         release_id = [
           app_basename,
           Time.now.to_i,
-          CLI.config.app_branch,
-          #CLI.config.app_commit_count,
-          CLI.config.app_short_commit_id
+          CLI.app_branch,
+          #CLI.app_commit_count,
+          CLI.app_short_commit_id
         ].join('-')
         out = Ploy.gen_vagrantfile(hostname, release_id)
 
-        vagrant_dir = File.join(CLI.config.app_root, '.ploy', hostname)
+        vagrant_dir = File.join(CLI.app_root, '.ploy', hostname)
 
         FileUtils.mkdir_p vagrant_dir
         File.open(vagrant_dir + '/Vagrantfile', 'w') do |f|
@@ -39,14 +39,14 @@ module Ploy
 
         s3 = Fog::Storage.new(
           provider: 'AWS',
-          aws_access_key_id:      CLI.config.aws_access_key,
-          aws_secret_access_key:  CLI.config.aws_secret_key,
+          aws_access_key_id:      CLI.aws_access_key,
+          aws_secret_access_key:  CLI.aws_secret_key,
         )
 
-        bucket = s3.directories.get(CLI.config.aws_bucket)
+        bucket = s3.directories.get(CLI.aws_bucket)
         p [:s3_bucket, bucket]
 
-        object_path = "slugs/#{CLI.config.app_name}/#{File.basename(path)}"
+        object_path = "slugs/#{CLI.app_name}/#{File.basename(path)}"
 
         p [:checking, object_path]
         object = bucket.files.head(object_path)
@@ -84,14 +84,14 @@ module Ploy
 
         ec2 = Fog::Compute.new(
           provider: 'AWS',
-          aws_access_key_id:      CLI.config.aws_access_key,
-          aws_secret_access_key:  CLI.config.aws_secret_key,
+          aws_access_key_id:      CLI.aws_access_key,
+          aws_secret_access_key:  CLI.aws_secret_key,
         )
 
         server = ec2.servers.get(instance_id)
         server.username = 'ubuntu'
         server.private_key = File.read(
-          File.expand_path CLI.config.aws_private_key_path
+          File.expand_path CLI.aws_private_key_path
         )
         p [:server, server]
 
@@ -112,11 +112,11 @@ module Ploy
         require_fog
         ec2 = Fog::Compute.new(
           provider: 'AWS',
-          aws_access_key_id:      CLI.config.aws_access_key,
-          aws_secret_access_key:  CLI.config.aws_secret_key,
+          aws_access_key_id:      CLI.aws_access_key,
+          aws_secret_access_key:  CLI.aws_secret_key,
         )
         server = ec2.servers.get(instance_id)
-        command = "ssh -i #{CLI.config.aws_private_key_path} ubuntu@#{server.dns_name}"
+        command = "ssh -i #{CLI.aws_private_key_path} ubuntu@#{server.dns_name}"
         puts command
         exec command
       end

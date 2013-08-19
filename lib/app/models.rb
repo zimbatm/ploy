@@ -223,4 +223,4 @@ module App
   include Models
 end
 
-ActiveRecord::Base.establish_connection(App.config.database_url)
+ActiveRecord::Base.establish_connection(App.database_url)

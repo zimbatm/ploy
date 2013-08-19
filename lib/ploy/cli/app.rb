@@ -8,7 +8,7 @@ module Ploy
   module CLI
     class App < Thor
       include Helpers
-      class_option :app, banner: 'APP_NAME', default: CLI.config.app_name
+      class_option :app, banner: 'APP_NAME', default: CLI.app_name
       desc "create", "New app"
       def create
         pp client.post_apps(options[:app])
@@ -47,7 +47,7 @@ module Ploy
 
       desc "deploy", "Deploys"
       def deploy(env='staging')
-        pp client.post_app_deploy(options[:app], CLI.config.app_commit_id, env)
+        pp client.post_app_deploy(options[:app], CLI.app_commit_id, env)
       end
     end
   end

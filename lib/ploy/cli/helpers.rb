@@ -7,8 +7,8 @@ module Ploy
       
       def client
         @client ||= (
-          host = CLI.config.ploy_host
-          api_key = CLI.config.ploy_api_key
+          host = CLI.ploy_host
+          api_key = CLI.ploy_api_key
           raise ConfigurationError, "Unknown host" unless host
           raise ConfigurationError, "Unknown api_key" unless api_key
 
