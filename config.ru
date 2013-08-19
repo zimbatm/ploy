@@ -1,5 +1,6 @@
 require File.expand_path('../boot', __FILE__)
 require 'app/api'
+require 'ploy'
 require 'beanstalkd_view'
 require 'lines/rack_logger'
 
@@ -15,4 +16,8 @@ map '/bs' do
   run BeanstalkdView::Server
 end
 
-run App::API
+map '/doc' do
+  use Rack::Static, urls: ['/'], index: 'index.html', root: File.join(Ploy.data_dir, 'swagger-ui')
+end
+
+run App::Root

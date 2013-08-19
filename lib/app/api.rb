@@ -1,5 +1,6 @@
 require 'base64'
 require 'grape'
+require 'grape-swagger'
 
 require 'app/api_entities'
 require 'app/models'
@@ -9,17 +10,16 @@ module App
   class API < Grape::API
     include Models
 
-    version 'v1', using: :header, vendor: 'ploy'
     format :json
 
     # Presenters setup
-    represent Account, with: Entities::Account
-    represent Application, with: Entities::Application
-    represent Provider, with: Entities::Provider
-    represent Slug, with: Entities::Slug
-    represent Target, with: Entities::Target
-    represent Token, with: Entities::Token
-    represent Build, with: Entities::Build
+    represent Account,      with: Entities::Account
+    represent Application,  with: Entities::Application
+    represent Provider,     with: Entities::Provider
+    represent Slug,         with: Entities::Slug
+    represent Target,       with: Entities::Target
+    represent Token,        with: Entities::Token
+    represent Build,        with: Entities::Build
 
     rescue_from ActiveRecord::RecordNotUnique do |e|
       Rack::Response.new('Already exists', 400)
@@ -35,7 +35,7 @@ module App
       def account
         return @account if @account
 
-        token_id = params['token'] || basic_pair.first
+        token_id = params['token'] || params['api_key'] || basic_pair.first
 
         token = token_id && Token.where(id: token_id, active: true).first
         @account = token.account if token
@@ -53,26 +53,29 @@ module App
       {Hi: true, token: Token.first.id}
     end
 
-    desc "Exposes the user's account informations", {
-      object_fields: Entities::Account.documentation
-    }
+    desc "Exposes the user's account informations"
     namespace '/account' do
+      desc "Returns the account info", {
+        notes: <<-NOTES
+          A totally awesome account
+          -------------------------
+
+          * This is
+          * _markdown_
+        NOTES
+      }
       get do
         present account
       end
 
-      desc "Returns the account's tokens", {
-        object_fields: Entities::Token.documentation
-      }
+      desc "Returns the account's tokens"
       get '/tokens' do
         present account.tokens
       end
     end
 
     namespace '/providers' do
-      desc "Returns the available services", {
-        object_fields: Entities::Provider.documentation
-      }
+      desc "Returns the available services"
       get do
         present account.providers
       end
@@ -107,6 +110,7 @@ module App
           end
         end
 
+        desc "Returns an application informations"
         get do
           present app
         end
@@ -115,7 +119,7 @@ module App
           desc "Creates a new slug"
           params do
             requires :commit_id, type: String, desc: "Id of the commit to build"
-            requires :branch, type: String, desc: "Branch to build"
+            requires :branch,    type: String, desc: "Branch to build"
           end
           post do
             build = app.builds.create!(commit_id: params[:commit_id], branch: params[:branch])
@@ -123,13 +127,15 @@ module App
             present build
           end
 
+          desc "Returns all the builds of the application"
           get do
             present app.builds
           end
 
+          desc "Displays the build logs as text"
           params do
-            requires :build_id, type: String, desc: "build_id"
-            optional :tail, type: Boolean, desc: "Follows changes in the file"
+            requires :build_id, type: String,  desc: "build_id"
+            optional :tail,     type: Boolean, desc: "Follows changes in the file"
           end
           get '/logs' do
             build = app.builds.find(params[:build_id])
@@ -166,10 +172,12 @@ module App
             present app.slugs.create!(declared(params))
           end
 
+          desc "Returns the info of a slug"
           get ':slug_id' do
             present app.slugs.find(params[:slug_id])
           end
 
+          desc "Removes a slug from the system"
           delete ':slug_id' do
             present app.slugs.delete(params[:slug_id])
           end
@@ -224,6 +232,9 @@ module App
         end
       end
     end
-
+  end
+  class Root < Grape::API
+    mount App::API
+    add_swagger_documentation markdown: true
   end
 end

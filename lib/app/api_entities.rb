@@ -22,6 +22,7 @@ module App
     end
 
     class Token < Grape::Entity
+      root 'tokens', 'token'
       expose :id
       expose :active
 
@@ -30,6 +31,7 @@ module App
     end
 
     class Slug < Grape::Entity
+      root 'slugs', 'slug'
       expose :id
 
       expose :commit_id
@@ -42,6 +44,7 @@ module App
     end
 
     class Provider < Grape::Entity
+      root 'providers', 'provider'
       expose :id
       expose :name
 
@@ -52,6 +55,7 @@ module App
     end
 
     class Target < Grape::Entity
+      root 'targets', 'target'
       expose :id
 
       expose :role
@@ -69,6 +73,7 @@ module App
     end
 
     class Build < Grape::Entity
+      root 'builds', 'build'
       expose :id
 
       expose :app_name
