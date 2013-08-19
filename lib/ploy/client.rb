@@ -64,12 +64,12 @@ module Ploy
 
       @scheme = options.delete(:scheme)
       @host = options.delete(:host)
-      @token = options.delete(:token)
+      @api_key = options.delete(:api_key)
       raise ArgumentError, "host option missing" unless @host
-      raise ArgumentError, "token option missing" unless @token
+      raise ArgumentError, "api_key option missing" unless @api_key
 
       options[:headers] = HEADERS.merge({
-        'Authorization' => "Basic #{Base64.encode64(@token + ':').rstrip}",
+        'Authorization' => "Basic #{Base64.encode64(@api_key + ':').rstrip}",
       }).merge(options[:headers])
 
       @connection = Excon.new("#{@scheme}://#{@host}", options)

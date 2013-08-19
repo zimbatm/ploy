@@ -28,7 +28,7 @@ module Ploy
       end
 
       def find_key(ruby_key)
-        re = Regexp.new('^' + ruby_key.gsub('_', '[\._]') + '$')
+        re = Regexp.new('^' + ruby_key.gsub('_', '[\._-]') + '$')
         keys = config.keys.grep(re)
         raise LogicError if keys.size > 1
         keys.first
@@ -78,7 +78,7 @@ module Ploy
     class Config < EnvConfig
       set_keys %w[
         ploy_host
-        ploy_token
+        ploy_api_key
 
         app_branch
         app_commit_count

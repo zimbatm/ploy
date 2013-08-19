@@ -9,12 +9,12 @@ module Ploy
       def client
         @client ||= (
           host = CLI.config.ploy_host
-          token = CLI.config.ploy_token
+          api_key = CLI.config.ploy_api_key
           raise ConfigurationError, "Unknown host" unless host
-          raise ConfigurationError, "Unknown token" unless token
+          raise ConfigurationError, "Unknown api_key" unless api_key
 
           require 'ploy/client'
-          Client.new(host: host, token: token)
+          Client.new(host: host, api_key: api_key)
         )
       end
 

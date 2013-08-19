@@ -25,7 +25,7 @@ module App
       include BCrypt
       default_scope ->{ order(:created_at) }
 
-      has_many :tokens
+      has_many :api_keys
 
       validates_presence_of :email
       validates_format_of   :email, with: /.+@.+/
@@ -52,7 +52,7 @@ module App
 
     end
 
-    class Token < Base
+    class ApiKey < Base
       include Common
 
       belongs_to :account

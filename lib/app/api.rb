@@ -14,12 +14,12 @@ module App
 
     # Presenters setup
     represent Account,      with: Entities::Account
+    represent ApiKey,       with: Entities::ApiKey
     represent Application,  with: Entities::Application
+    represent Build,        with: Entities::Build
     represent Provider,     with: Entities::Provider
     represent Slug,         with: Entities::Slug
     represent Target,       with: Entities::Target
-    represent Token,        with: Entities::Token
-    represent Build,        with: Entities::Build
 
     rescue_from ActiveRecord::RecordNotUnique do |e|
       Rack::Response.new('Already exists', 400)
@@ -35,10 +35,10 @@ module App
       def account
         return @account if @account
 
-        token_id = params['token'] || params['api_key'] || basic_pair.first
+        api_key = params['api_key'] || basic_pair.first
 
-        token = token_id && Token.where(id: token_id, active: true).first
-        @account = token.account if token
+        api_key = api_key && ApiKey.where(id: api_key, active: true).first
+        @account = api_key.account if api_key
 
         @account || error!('Unauthorized', 401)
       end
@@ -50,7 +50,7 @@ module App
 
     desc "Hi"
     get do
-      {Hi: true, token: Token.first.id}
+      {Hi: true, api_key: ApiKey.first.id}
     end
 
     desc "Exposes the user's account informations"
@@ -68,9 +68,9 @@ module App
         present account
       end
 
-      desc "Returns the account's tokens"
-      get '/tokens' do
-        present account.tokens
+      desc "Returns the account's API keys"
+      get '/keys' do
+        present account.api_keys
       end
     end
 

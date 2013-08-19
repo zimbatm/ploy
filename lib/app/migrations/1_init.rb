@@ -16,7 +16,7 @@ class Init < ActiveRecord::Migration
     add_index :accounts, :id, unique: true
     add_index :accounts, :created_at, order: 'desc'
 
-    create_table :tokens, id: false do |t|
+    create_table :api_keys, id: false do |t|
       t.string :id, limit: 36, null: false
       t.string :account_id, limit: 36
       t.boolean :active, default: true
@@ -24,8 +24,8 @@ class Init < ActiveRecord::Migration
       t.timestamps
       t.datetime :deleted_at
     end
-    add_index :tokens, :id, unique: true
-    #add_index :tokens, [:account_id, :created_at], order: 'desc'
+    add_index :api_keys, :id, unique: true
+    #add_index :api_keys, [:account_id, :created_at], order: 'desc'
     #
     create_table :applications, id: false do |t|
       t.string :id, limit: 36, null: false

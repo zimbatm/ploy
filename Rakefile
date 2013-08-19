@@ -19,9 +19,9 @@ task :init => ['db:migrate'] do
   include App::Models
 
   a = Account.create(email: 'foo@bar.com', password: '1234')
-  a.tokens.create
+  a.api_keys.create
 
-  Token.connection.execute("UPDATE tokens SET id='foobar'")
+  ApiKey.connection.execute("UPDATE api_keys SET id='foobar'")
 
   provider = a.providers.create(
     name: 'build-service-staging',

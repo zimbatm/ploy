@@ -21,8 +21,8 @@ module App
       expose :updated_at
     end
 
-    class Token < Grape::Entity
-      root 'tokens', 'token'
+    class ApiKey < Grape::Entity
+      root 'api_keys', 'api_key'
       expose :id
       expose :active
 
