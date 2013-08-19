@@ -1,5 +1,4 @@
 require 'ploy/cli/config'
-require 'ploy/cli/errors'
 
 module Ploy
   module CLI

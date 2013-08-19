@@ -1,8 +1,10 @@
 require 'ploy/env_config'
-require 'ploy/cli/errors'
+require 'ploy/errors'
 
 module Ploy
   module CLI
+    class ConfigurationError < Ploy::UserError; end
+
     # Small wrapper class around the command line that handles loading 
     # config from git
     class GitConfig
