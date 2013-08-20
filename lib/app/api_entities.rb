@@ -2,59 +2,74 @@ require 'grape_entity'
 
 module App
   module Entities
-    class Account < Grape::Entity
+    class Entity < Grape::Entity
+      format_with(:iso_timestamp) { |dt| dt.iso8601 }
+    end
+
+    class Account < Entity
       root 'accounts', 'account'
       expose :id
       expose :email
       expose :full_name
 
-      expose :created_at
-      expose :updated_at
+      with_options(format_with: :iso_timestamp ) do
+        expose :created_at
+        expose :updated_at
+      end
     end
 
-    class Application < Grape::Entity
-      root 'applications', 'application'
-      expose :id
-      expose :name
-
-      expose :created_at
-      expose :updated_at
-    end
-
-    class ApiKey < Grape::Entity
+    class ApiKey < Entity
       root 'api_keys', 'api_key'
       expose :id
       expose :active
 
-      expose :created_at
-      expose :updated_at
+      with_options(format_with: :iso_timestamp ) do
+        expose :created_at
+        expose :updated_at
+      end
     end
 
-    class Slug < Grape::Entity
-      root 'slugs', 'slug'
+    class Application < Entity
+      root 'applications', 'application'
       expose :id
+      expose :name
 
-      expose :commit_id
-      expose :branch
-
-      expose :created_at
-      expose :updated_at
-      expose :checksum
-      expose :url
+      with_options(format_with: :iso_timestamp ) do
+        expose :created_at
+        expose :updated_at
+      end
     end
 
-    class Provider < Grape::Entity
+    class Provider < Entity
       root 'providers', 'provider'
       expose :id
       expose :name
 
       expose :config
 
-      expose :created_at
-      expose :updated_at
+      with_options(format_with: :iso_timestamp ) do
+        expose :created_at
+        expose :updated_at
+      end
     end
 
-    class Target < Grape::Entity
+    class Slug < Entity
+      root 'slugs', 'slug'
+      expose :id
+
+      expose :commit_id
+      expose :branch
+
+      expose :checksum
+      expose :url
+
+      with_options(format_with: :iso_timestamp ) do
+        expose :created_at
+        expose :updated_at
+      end
+    end
+
+    class Target < Entity
       root 'targets', 'target'
       expose :id
 
@@ -62,17 +77,18 @@ module App
       expose :env
       expose :config
 
-      expose :application_id
-      expose :provider_id
-      expose :slug_id
+      expose :application,  using: Application
+      expose :provider,     using: Provider
+      expose :slug,         using: Slug
 
-      expose :deployed_at
-
-      expose :created_at
-      expose :updated_at
+      with_options(format_with: :iso_timestamp ) do
+        expose :deployed_at
+        expose :created_at
+        expose :updated_at
+      end
     end
 
-    class Build < Grape::Entity
+    class Build < Entity
       root 'builds', 'build'
       expose :id
 

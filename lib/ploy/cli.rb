@@ -51,13 +51,13 @@ module Ploy
         pp client.get_providers
       end
 
-      desc "app SUBCOMMAND ...ARGS", "manage the app"
+      desc "app [COMMAND]", "manage the app"
       subcommand "app", App
 
-      desc "build SUBCOMMAND ...ARGS", "builds slugs"
+      desc "build [COMMAND]", "builds slugs"
       subcommand "build", Build
 
-      desc "standalone SUBCOMMAND ...ARGS", "local commands"
+      desc "standalone [COMMAND]", "local commands"
       subcommand "standalone", Standalone
 
       desc "version", "Prints the version of ploy"

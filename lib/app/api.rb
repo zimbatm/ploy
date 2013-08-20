@@ -57,7 +57,6 @@ module App
       {Hi: true, api_key: ApiKey.first.id}
     end
 
-    desc "Exposes the user's account informations"
     namespace '/account' do
       desc "Returns the account info", {
         notes: <<-NOTES
@@ -70,11 +69,6 @@ module App
       }
       get do
         present account
-      end
-
-      desc "Returns the account's API keys"
-      get '/keys' do
-        present account.api_keys
       end
     end
 
@@ -166,11 +160,10 @@ module App
 
           desc 'Registers a new slug'
           params do
-            requires :build_id, type: String, desc: "Jenkins build ID"
+            requires :build_id,  type: String, desc: "Jenkins build ID"
             requires :commit_id, type: String, desc: "ID of the commit where the slug was built"
-            requires :branch, type: String, desc: "Branch of the commit"
-
-            requires :url, type: String, desc: "Where to fetch the build"
+            requires :branch,    type: String, desc: "Branch of the commit"
+            requires :url,       type: String, desc: "Where to fetch the build"
           end
           post do
             present app.slugs.create!(declared(params))
@@ -194,6 +187,10 @@ module App
           end
 
           desc 'Creates a new deploy target for the app'
+          params do
+            requires :env,  type: String, desc: "Environment to deploy to"
+            requires :role, type: String, desc: "Role"
+          end
           post do
             present app.targets.create!(declared(params))
           end
