@@ -40,9 +40,9 @@ module App
 
       validates_format_of :name, with: /\A[\w\-\.]+\/[\w\-\.]+\z/
 
-      has_many :slugs
-      has_many :targets
-      has_many :builds
+      has_many :builds,   dependent: :destroy
+      has_many :slugs,    dependent: :destroy
+      has_many :targets,  dependent: :destroy
 
       def basename; File.basename(name); end
 
@@ -58,8 +58,7 @@ module App
     class Slug < Base
       include GeneratedID
 
-      belongs_to :application
-      validates_presence_of :build_id
+      belongs_to            :application
       validates_presence_of :commit_id
       validates_presence_of :branch
       validates_presence_of :url
@@ -96,8 +95,6 @@ module App
       validates_presence_of :ssh_private_key
       validates_presence_of :ssh_public_key
 
-      #validates(:config) { compute }
-
       def servers; compute.servers; end
 
       def servers_for_target(target)
@@ -127,8 +124,8 @@ module App
       include GeneratedID
 
       belongs_to :application
-      belongs_to :slug
       belongs_to :provider
+      belongs_to :slug
 
       def hosts
         provider.servers_for_target(self)

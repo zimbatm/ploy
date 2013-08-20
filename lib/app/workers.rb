@@ -142,7 +142,6 @@ module App
         :object_name => file.key)
 
       app.slugs.create!(
-        build_id: build_id,
         commit_id: commit_id,
         branch: branch,
         url: url,
