@@ -12,8 +12,7 @@ Gem::Specification.new do |s|
   s.license = 'MIT'
 
   s.files = %w[README.md bin/ploy lib/ploy.rb] +
-    Dir['lib/ploy.rb', 'lib/ploy/**/*.rb'] +
-    Dir['data/**/*']
+    Dir['lib/ploy/**/*.rb', 'data/**/*']
 
   s.executable = 'ploy'
 
