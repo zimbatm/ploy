@@ -27,7 +27,6 @@ GEM
     arel (4.0.0)
     atomic (1.1.13)
     backports (3.3.3)
-    bcrypt-ruby (3.1.1)
     beaneater (0.3.1)
     beanstalkd_view (1.2.4)
       beaneater (~> 0.3.0)
@@ -88,8 +87,6 @@ GEM
     net-ssh (2.6.8)
     nokogiri (1.6.0)
       mini_portile (~> 0.5.0)
-    paranoia (2.0.0)
-      activerecord (~> 4.0)
     path (1.3.1)
     pry (0.9.12.2)
       coderay (~> 1.0.5)
@@ -151,7 +148,6 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 4.0.x)
-  bcrypt-ruby
   beaneater
   beanstalkd_view
   fog
@@ -161,7 +157,6 @@ DEPENDENCIES
   grape-swagger
   json
   lines
-  paranoia
   path
   ploy!
   pry

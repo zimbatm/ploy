@@ -55,7 +55,7 @@ module Ploy
       end
 
       def commit_count
-        git("log --oneline | wc -l")
+        git("log --oneline | wc -l").to_i
       end
 
       def branch

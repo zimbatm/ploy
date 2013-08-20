@@ -27,7 +27,6 @@ class BuildTables < ActiveRecord::Migration
       t.string :url, null: false
 
       t.timestamps
-      t.datetime :deleted_at
     end
     add_index :slugs, :id, unique: true
   end

@@ -10,7 +10,6 @@ class DeployTables < ActiveRecord::Migration
       t.string :ssh_public_key, limit: 512
 
       t.timestamps
-      t.datetime :deleted_at
     end
     add_index :providers, :id, unique: true
 
@@ -27,7 +26,6 @@ class DeployTables < ActiveRecord::Migration
       t.binary :config
 
       t.timestamps
-      t.datetime :deleted_at
     end
     add_index :targets, :id, unique: true
     #add_index :targets, [:role, :env, :application_id, :provider_id], unique: true

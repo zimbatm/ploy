@@ -1,8 +1,6 @@
 require 'active_record'
-require 'bcrypt'
 require 'fog'
 require 'lines/active_record'
-require 'paranoia'
 require 'uri'
 
 require 'app/config'
@@ -13,32 +11,13 @@ module App
   module Models
     Base = ActiveRecord::Base
 
-    module Common
-      def self.included(klass)
-        klass.send(:include, GeneratedID)
-        klass.acts_as_paranoid
-      end
-    end
-
     class Account < Base
-      include Common
-      include BCrypt
-      default_scope ->{ order(:created_at) }
+      include GeneratedID
 
       has_many :api_keys
 
       validates_presence_of :email
       validates_format_of   :email, with: /.+@.+/
-      validates_presence_of :hashed_password
-
-      def password
-        @password ||= Password.new(hashed_password)
-      end
-
-      def password=(new_password)
-        @password = Password.create(new_password)
-        self.hashed_password = @password
-      end
 
       # For now all apps are shared with everyone
       def apps
@@ -49,19 +28,17 @@ module App
       def providers
         Provider.all
       end
-
     end
 
     class ApiKey < Base
-      include Common
-
+      include GeneratedID
       belongs_to :account
     end
 
     class Application < Base
-      include Common
+      include GeneratedID
 
-      validates_format_of   :name, with: /\A[\w\-\.]+\/[\w\-\.]+\z/
+      validates_format_of :name, with: /\A[\w\-\.]+\/[\w\-\.]+\z/
 
       has_many :slugs
       has_many :targets
@@ -72,10 +49,14 @@ module App
       def data_dir
         App.var_dir / 'apps' / name
       end
+
+      def repo_url
+        "https://github.com/#{name}.git"
+      end
     end
 
     class Slug < Base
-      include Common
+      include GeneratedID
 
       belongs_to :application
       validates_presence_of :build_id
@@ -107,7 +88,7 @@ module App
     end
 
     class Provider < Base
-      include Common
+      include GeneratedID
 
       serialize :config, HashSerializer.new
 
@@ -143,7 +124,7 @@ module App
     end
 
     class Target < Base
-      include Common
+      include GeneratedID
 
       belongs_to :application
       belongs_to :slug

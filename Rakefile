@@ -13,12 +13,14 @@ task :boot do
   require File.expand_path('../boot', __FILE__)
 end
 
+directory 'var'
+
 desc "Creates base architecture for testing"
 task :init => ['db:migrate'] do
   require 'app/models'
   include App::Models
 
-  a = Account.create(email: 'foo@bar.com', password: '1234')
+  a = Account.create(email: 'foo@bar.com')
   a.api_keys.create
 
   ApiKey.connection.execute("UPDATE api_keys SET id='foobar'")
@@ -44,14 +46,12 @@ task :init => ['db:migrate'] do
     )
   )
   app.data_dir.mkdir_p
-  app.data_dir.chdir do
-    system("git clone --mirror git@github.com:#{app.name}.git source_repo")
-  end
+  system("git clone --mirror #{app.repo_url} #{app.data_dir}/source_repo")
 end
 
 namespace :db do
   desc "Updates the database's model"
-  task :migrate => :boot do
+  task :migrate => [:var, :boot] do
     require 'app/models'
     require 'active_record'
     ActiveRecord::Migrator.migrations_paths.replace([App.root_dir / 'lib/app/migrations'])

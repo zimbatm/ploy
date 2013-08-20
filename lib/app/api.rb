@@ -87,7 +87,6 @@ module App
 
       desc "Creates a new app"
       params do
-        # FIXME: match github_user/github_repo
         requires :name, type: String, desc: "Application name"
       end
       post do
