@@ -34,7 +34,8 @@ if ! has add-apt-repository ; then
 fi
 
 if ! has docker ; then
-  add-apt-repository -y ppa:dotcloud/lxc-docker
+  wget -O - https://get.docker.io/gpg | apt-key add -
+  echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list
   updated=
   install lxc-docker
 fi
