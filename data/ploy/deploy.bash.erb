@@ -94,7 +94,7 @@ if [ -f /home/ubuntu/.ssh/authorized_keys ] ; then
 fi
 
 if ! has_user $APP_USER ; then
-  adduser --system --home $APP_HOME --shell /bin/bash --no-create-home \
+  adduser --system --home $APP_HOME --group --shell /bin/bash --no-create-home \
     --gecos "App" --disabled-password $APP_USER
 fi
 
