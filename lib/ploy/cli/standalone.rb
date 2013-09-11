@@ -39,8 +39,8 @@ module Ploy
 
         s3 = Fog::Storage.new(
           provider: 'AWS',
-          aws_access_key_id:      CLI.aws_access_key,
-          aws_secret_access_key:  CLI.aws_secret_key,
+          aws_access_key_id:      CLI.aws_access_key_id,
+          aws_secret_access_key:  CLI.aws_secret_access_key,
         )
 
         bucket = s3.directories.get(CLI.aws_bucket)
@@ -84,8 +84,8 @@ module Ploy
 
         ec2 = Fog::Compute.new(
           provider: 'AWS',
-          aws_access_key_id:      CLI.aws_access_key,
-          aws_secret_access_key:  CLI.aws_secret_key,
+          aws_access_key_id:      CLI.aws_access_key_id,
+          aws_secret_access_key:  CLI.aws_secret_access_key,
         )
 
         server = ec2.servers.get(instance_id)
@@ -112,8 +112,8 @@ module Ploy
         require_fog
         ec2 = Fog::Compute.new(
           provider: 'AWS',
-          aws_access_key_id:      CLI.aws_access_key,
-          aws_secret_access_key:  CLI.aws_secret_key,
+          aws_access_key_id:      CLI.aws_access_key_id,
+          aws_secret_access_key:  CLI.aws_secret_access_key,
         )
         server = ec2.servers.get(instance_id)
         command = "ssh -i #{CLI.aws_private_key_path} ubuntu@#{server.dns_name}"
