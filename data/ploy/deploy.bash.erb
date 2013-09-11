@@ -114,7 +114,7 @@ tar --no-same-owner -xaf "$SLUG_FILE"
 # For now the convention is that var/ is the place where your app can share data
 mkdir -p $DATA_DIR
 chown $APP_USER:$APP_USER $DATA_DIR
-ln -sf $DATA_DIR $APP_HOME/var
+ln -sf $DATA_DIR var
 
 log Install starting
 ./script/install $CONFIG_FILE
@@ -143,7 +143,7 @@ else
 fi
 
 log Cleaning old deploys
-for deploy_id in $(ls $PLOY_ROOT/deploy/ | sort -r | tail -n +5 | sort) ; do
+for deploy_id in $(ls $PLOY_ROOT/deploys/ | sort -r | tail -n +5 | sort) ; do
   log "Removing $deploy_id"
-  rm -rf $PLOY_ROOT/deploy/$deploy_id
+  rm -rf $PLOY_ROOT/deploys/$deploy_id
 done
