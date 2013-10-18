@@ -1,4 +1,11 @@
 
+. /etc/lsb-release
+
+if [ "$DISTRIB_ID" != "Ubuntu" ]; then
+  echo "Sorry, this script only works on ubuntu !"
+  exit 1
+fi
+
 # Don't ... ask ... questions !
 export DEBIAN_FRONTEND='noninteractive'
 
@@ -51,10 +58,15 @@ check_gems() {
   local wanted="$@"
   [ -z "$wanted" ] && return
 
-  local installed=`gem list | cut -d ' ' -f 1 | tr '\n' ' '`
-  local missing=`echo $wanted $installed | tr ' ' '\n' | sort | uniq -u | tr '\n' ' '`
+  local installed=`gem list | cut -d ' ' -f 1`
+  for gem in $wanted; do
+    if ! echo $installed | tr ' ' '\n' | grep -e "^$gem$" &>/dev/null ; then
+      missing="$missing $gem"
+    fi
+  done
+
   [ -z "$missing" ] && return
 
   echo "Missing GEMS: $missing"
-  sudo gem install --no-ri --no-rdoc --force $missing
+  sudo gem install --no-ri --no-rdoc --force --source http://rubygems.org/ $missing
 }
